@@ -944,6 +944,7 @@
 
   function render() {
     $("#page-title").textContent = TITRES[ui.tab];
+    document.title = state.enfants.length ? state.enfants.map(k => k.nom).join(" & ") : "Grandir ensemble";
     const view = $("#view");
     view.innerHTML = { enfants: renderEnfants, developpement: renderDeveloppement, activite: renderActivite, famille: renderFamille, journal: renderJournal }[ui.tab]();
     document.querySelectorAll(".tabbar button").forEach(b => b.classList.toggle("on", b.dataset.tab === ui.tab));

@@ -1,6 +1,6 @@
 {
-  "name": "Grandir ensemble",
-  "short_name": "Grandir",
+  "name": "Titi & Loulou",
+  "short_name": "Titi & Loulou",
   "description": "Profils, repères de développement, idées d'activités et journal pour nos enfants.",
   "lang": "fr",
   "start_url": "./",
@@ -9,6 +9,23 @@
   "background_color": "#fff8f1",
   "theme_color": "#f97316",
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ]
 }

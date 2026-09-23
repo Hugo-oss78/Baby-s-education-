@@ -1,6 +1,6 @@
 /* Cache hors-ligne : l'application fonctionne sans connexion une fois ouverte. */
-const CACHE = "grandir-v2";
-const FICHIERS = ["./", "index.html", "css/style.css", "js/activities.js", "js/reperes.js", "js/famille-data.js", "js/app.js", "manifest.webmanifest", "icon.svg"];
+const CACHE = "grandir-v3";
+const FICHIERS = ["./", "index.html", "css/style.css", "js/activities.js", "js/reperes.js", "js/famille-data.js", "js/app.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FICHIERS)).then(() => self.skipWaiting()));

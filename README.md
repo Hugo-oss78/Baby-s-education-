@@ -1,4 +1,4 @@
-# 🌱 Grandir ensemble
+# 🦁🌱🐻 Titi & Loulou
 
 Application web (installable sur téléphone) pour accompagner l'éducation de nos enfants, Titi et Loulou.
 
