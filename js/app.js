@@ -44,7 +44,7 @@
   /* Emblèmes dessinés (img/*.svg), utilisables comme avatar à la place d'un emoji. */
   const EMBLEMES = { lion: { label: "Lion", src: "img/lion.svg" }, loutre: { label: "Loutre", src: "img/loutre.svg" } };
   const AVATARS = ["lion", "loutre", "🦁", "🐻", "🐰", "🦊", "🐼", "🐯", "🐨", "🐸", "🦄", "🐳", "🐥", "🐶", "🐱", "🦋"];
-  const COULEURS = ["#c9a45c", "#8b5a38", "#f59e0b", "#8b5cf6", "#10b981", "#ef4444", "#3b82f6", "#ec4899"];
+  const COULEURS = ["#3f6fb5", "#d0799a", "#c9a45c", "#8b5a38", "#f59e0b", "#8b5cf6", "#10b981", "#ef4444", "#3b82f6", "#ec4899"];
 
   const SUBS = {
     motricite: { interieur: "🏠 Intérieur", exterieur: "🌳 Extérieur", aquatique: "💧 Dans l'eau" },
@@ -74,7 +74,7 @@
   }
 
   function defaultState() {
-    return { version: 1, enfants: [newChild("Titi", "lion", "#c9a45c"), newChild("Loulou", "loutre", "#8b5a38")], journal: [], favoris: [], routines: [], routineLog: {}, bibliotheque: [], defis: {} };
+    return { version: 1, enfants: [newChild("Titi", "lion", "#3f6fb5"), newChild("Loulou", "loutre", "#d0799a")], journal: [], favoris: [], routines: [], routineLog: {}, bibliotheque: [], defis: {} };
   }
 
   function migrate(s) {
@@ -83,8 +83,11 @@
     out.enfants = out.enfants.map(e => Object.assign(newChild(e.nom || "Enfant", e.emoji || "🐥", e.couleur || COULEURS[2]), e));
     // Anciens avatars emoji de Titi et Loulou → nouveaux emblèmes dessinés
     out.enfants.forEach(e => {
-      if (e.emoji === "🦁") { e.emoji = "lion"; if (e.couleur === "#f59e0b") e.couleur = "#c9a45c"; }
-      if (e.nom === "Loulou" && e.emoji === "🐻") { e.emoji = "loutre"; if (e.couleur === "#8b5cf6") e.couleur = "#8b5a38"; }
+      if (e.emoji === "🦁") e.emoji = "lion";
+      if (e.nom === "Loulou" && e.emoji === "🐻") e.emoji = "loutre";
+      // Couleurs par défaut d'origine → bleu pour le lion, rose pour la loutre
+      if (e.emoji === "lion" && ["#f59e0b", "#c9a45c"].includes(e.couleur)) e.couleur = "#3f6fb5";
+      if (e.emoji === "loutre" && ["#8b5cf6", "#8b5a38"].includes(e.couleur)) e.couleur = "#d0799a";
     });
     const obj = v => (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
     out.routines = Array.isArray(s.routines) ? s.routines : [];

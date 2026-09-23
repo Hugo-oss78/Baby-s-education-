@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200">
   <defs>
     <radialGradient id="fondL" cx="0" cy="-20" r="120" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#23413a"/><stop offset="1" stop-color="#132822"/>
+      <stop offset="0" stop-color="#2f5288"/><stop offset="1" stop-color="#15264a"/>
     </radialGradient>
     <linearGradient id="criniere" x1="0" y1="-1" x2="0" y2="1">
       <stop offset="0" stop-color="#c8913a"/><stop offset="1" stop-color="#8f5a1f"/>
