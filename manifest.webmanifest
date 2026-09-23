@@ -1,0 +1,14 @@
+{
+  "name": "Grandir ensemble",
+  "short_name": "Grandir",
+  "description": "Profils, repères de développement, idées d'activités et journal pour nos enfants.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff8f1",
+  "theme_color": "#f97316",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

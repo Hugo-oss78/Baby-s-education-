@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Grandir ensemble</title>
+  <meta name="description" content="Profils, repères de développement, idées d'activités et journal pour accompagner l'éducation de nos enfants.">
+  <meta name="theme-color" content="#f97316">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🌱 <span id="page-title">Grandir ensemble</span></div>
+    <button class="icon-btn" data-action="open-settings" aria-label="Sauvegarde et réglages">⚙️</button>
+  </header>
+
+  <main id="view" class="container"></main>
+
+  <nav class="tabbar" aria-label="Onglets">
+    <button data-tab="enfants"><span>👧🧒</span>Enfants</button>
+    <button data-tab="developpement"><span>🌱</span>Développement</button>
+    <button data-tab="activite"><span>✨</span>Activité</button>
+    <button data-tab="journal"><span>📔</span>Journal</button>
+  </nav>
+
+  <dialog id="modal"><div id="modal-body"></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/activities.js"></script>
+  <script src="js/reperes.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
