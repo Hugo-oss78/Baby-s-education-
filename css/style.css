@@ -1,31 +1,39 @@
 :root {
-  --bg: #fff8f1;
+  --bg: #f7f3ec;
   --surface: #ffffff;
-  --soft: #fff1e3;
-  --text: #2b2230;
-  --muted: #7a6d78;
-  --line: #f0e2d4;
-  --primary: #f97316;
-  --primary-ink: #ffffff;
-  --accent: #8b5cf6;
-  --ok: #10b981;
-  --danger: #dc2626;
-  --warn-bg: #fff4d6;
-  --warn-ink: #8a5a00;
+  --soft: #f2ece1;
+  --text: #1d2742;
+  --muted: #6b6f80;
+  --line: #e7dfd2;
+  --primary: #1b3160;
+  --primary-ink: #fbf6ec;
+  --accent: #a9567a;
+  --gold: #b8913f;
+  --ok: #3f8a68;
+  --danger: #b3261e;
+  --warn-bg: #f6ecd6;
+  --warn-ink: #6f521a;
   --radius: 18px;
-  --shadow: 0 2px 10px rgba(80, 40, 20, .07);
+  --shadow: 0 1px 2px rgba(27, 49, 96, .05), 0 4px 14px rgba(27, 49, 96, .06);
   --tabbar-h: 68px;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1b1720;
-    --surface: #26212c;
-    --soft: #2f2835;
-    --text: #f3ecf5;
-    --muted: #b3a6b6;
-    --line: #3a3241;
-    --warn-bg: #3b3020;
-    --warn-ink: #f5d38a;
+    --bg: #111a2e;
+    --surface: #1a2440;
+    --soft: #222e4e;
+    --text: #f3ede2;
+    --muted: #a9aec0;
+    --line: #2e3a5c;
+    --primary: #d2b06a;
+    --primary-ink: #111a2e;
+    --accent: #e19ab4;
+    --gold: #d2b06a;
+    --ok: #6cc39a;
+    --danger: #f08a80;
+    --warn-bg: #3a3222;
+    --warn-ink: #f1d596;
     --shadow: none;
   }
 }
@@ -40,6 +48,8 @@ body {
   padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px);
 }
 h1, h2, h3, h4 { line-height: 1.25; margin: 0 0 .5em; }
+h1, h2, h3, .brand, .q { font-family: var(--serif); letter-spacing: .005em; }
+h2 { font-weight: 700; }
 h2 { font-size: 1.3rem; }
 h3 { font-size: 1.05rem; }
 h4 { font-size: .95rem; margin-top: 1em; }
@@ -57,7 +67,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
-.brand { font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.brand { font-weight: 700; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 8px; min-width: 0; }
 .logo { width: 32px; height: 32px; border-radius: 9px; flex: none; }
 .icon-btn { background: none; border: 0; font-size: 1.3rem; padding: 6px; cursor: pointer; border-radius: 10px; }
 
@@ -75,9 +85,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   font-size: .68rem; color: var(--muted); padding: 0 2px; min-width: 0;
 }
-.tabbar button span { font-size: 1.35rem; filter: grayscale(.6); opacity: .8; }
+.tabbar svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .tabbar button.on { color: var(--primary); font-weight: 700; }
-.tabbar button.on span { filter: none; opacity: 1; transform: scale(1.08); }
+.tabbar button.on svg { stroke-width: 2; }
+.tabbar button.on::before { content: ""; position: absolute; top: 0; width: 28px; height: 3px; border-radius: 0 0 3px 3px; background: var(--gold); }
+.tabbar button { position: relative; }
 
 /* ─── Cartes ─── */
 .card {
@@ -150,7 +162,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .act-body .muted { font-size: .88rem; }
 .meta { font-size: .78rem; color: var(--muted); }
 .why { font-size: .8rem; color: var(--accent); }
-.fav { color: #e11d48; }
+.fav { color: var(--accent); }
 
 /* ─── Segments (sélecteurs) ─── */
 .seg { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 10px; padding-bottom: 2px; scrollbar-width: none; }
@@ -235,7 +247,7 @@ dialog::backdrop { background: rgba(30, 15, 30, .45); }
 .chip.color span { width: 32px; height: 32px; padding: 0; border: 3px solid transparent; }
 .chip.color input:checked + span { border-color: var(--text); }
 .chip-btn { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: .88rem; }
-.chip-btn.on { background: var(--ok); border-color: var(--ok); color: #fff; }
+.chip-btn.on { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
 
 /* ─── Fiche activité ─── */
 .fiche-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
@@ -334,3 +346,26 @@ dialog.kid #modal-body { max-height: 100vh; height: 100%; }
 .backup-banner { display: flex; align-items: center; gap: 12px; background: var(--warn-bg); color: var(--warn-ink); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; }
 .backup-banner div { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: .88rem; }
 .backup-banner strong { font-size: .95rem; }
+
+/* ─── Thème élégant : détails ─── */
+.card h3 { color: var(--primary); }
+.child-card { border-top-width: 4px; }
+.child-actions { display: flex; flex-direction: column; gap: 6px; }
+.tag.grand { background: color-mix(in srgb, var(--gold) 18%, var(--surface)); color: var(--warn-ink); }
+abbr.src { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; margin-left: 2px; border-radius: 6px; font-size: .66rem; font-weight: 700; text-decoration: none; vertical-align: 1px; background: var(--soft); color: var(--muted); border: 1px solid var(--line); cursor: help; }
+.sources summary { cursor: pointer; font-weight: 600; color: var(--primary); }
+.sources ul { padding-left: 0; list-style: none; margin: 10px 0; }
+.sources li { margin-bottom: 8px; font-size: .88rem; }
+.sources a { color: var(--primary); }
+.welcome { text-align: center; background: linear-gradient(135deg, color-mix(in srgb, #1b3160 8%, var(--surface)), color-mix(in srgb, #c47a92 10%, var(--surface))); border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); }
+.welcome h2 { margin-top: 8px; }
+.welcome-emb { display: flex; justify-content: center; gap: 8px; }
+.duo { display: flex; }
+.duo .avatar + .avatar { margin-left: -14px; }
+.quiz-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.quiz-head div { display: flex; flex-direction: column; }
+.quiz .q { margin-top: 14px; }
+.quiz-champ { margin: 12px 0; }
+.quiz .chip span { padding: 9px 14px; font-size: .95rem; }
+.big-input { font-size: 1.1rem !important; padding: 14px !important; }
+.btn.primary { box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 25%, transparent); }

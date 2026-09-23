@@ -38,6 +38,7 @@
     sciences: "🔬 Sciences", imaginaire: "🦄 Imaginaire / déguisements"
   };
 
+  const AVANCES = { "0": "Son âge", "6": "Un peu plus grand (+6 mois)", "12": "Plus grand (+1 an)", "18": "Bien plus grand (+1 an ½)" };
   const TEMPERAMENTS = { calme: "Plutôt calme", equilibre: "Entre les deux", energique: "Très énergique" };
   const SOCIABILITE = { reserve: "Plutôt réservé(e)", variable: "Ça dépend", sociable: "Très sociable" };
   const RESSENTIS = { "😍": "Adoré", "🙂": "Bien", "😐": "Mitigé", "😣": "Difficile" };
@@ -69,7 +70,7 @@
     return {
       id: uid(), nom, emoji, couleur, naissance: "", temperament: "", sociabilite: "",
       interets: [], forces: "", aEncourager: [], eau: 0, langues: "", garde: "", sommeil: "",
-      sante: "", peurs: "", apaise: "", notes: "", acquis: {}
+      sante: "", peurs: "", apaise: "", notes: "", acquis: {}, avance: 0
     };
   }
 
@@ -140,6 +141,7 @@
   }
   function ageRange(a) {
     const f = m => m < 24 ? m + " mois" : Math.floor(m / 12) + " ans";
+    if (a[0] === 0 && a[1] >= 144) return "tous âges";
     return a[1] >= 144 ? "dès " + f(a[0]) : f(a[0]) + " – " + f(a[1]);
   }
   function tranchePour(m) {
@@ -174,9 +176,16 @@
   }
 
   // ───────────────────────── Moteur de recommandation ─────────────────────────
+  /* L'activité convient si sa tranche d'âge croise [âge réel, âge réel + avance choisie dans le profil]. */
   function ageOk(a, kid) {
     const m = ageMois(kid);
-    return m === null || (m >= a.age[0] && m <= a.age[1]);
+    if (m === null) return true;
+    const avance = kid.avance || 0;
+    return a.age[0] <= m + avance && a.age[1] >= m;
+  }
+  function pourPlusGrand(a, kid) {
+    const m = ageMois(kid);
+    return m !== null && m < a.age[0];
   }
   function eauOk(a, kid) {
     return a.eauMin === undefined || (kid.eau || 0) >= a.eauMin;
@@ -195,6 +204,7 @@
       const nbAge = kids.filter(k => ageOk(a, k)).length;
       if (nbAge === 0) continue;
       const aAdapter = nbAge < kids.length;
+      const plusGrand = kids.filter(k => ageOk(a, k) && pourPlusGrand(a, k));
 
       let score = 0;
       const raisons = [];
@@ -213,7 +223,8 @@
       if (a.lien) score += 0.5;
       if (aAdapter) score -= 4;
       score += hash(a.id, seed || 0.5) * 2.5;
-      res.push({ a, score, raisons: [...new Set(raisons)], aAdapter });
+      if (plusGrand.length) raisons.push("Un peu au-dessus de l'âge de " + nomsKids(plusGrand) + " : à accompagner");
+      res.push({ a, score, raisons: [...new Set(raisons)], aAdapter, plusGrand: plusGrand.length > 0 });
     }
     return res.sort((x, y) => y.score - x.score);
   }
@@ -241,6 +252,7 @@
         <span class="muted">${esc(a.resume)}</span>
         <span class="meta">⏱ ${a.duree} min · ${lieux} · ${ageRange(a.age)}${a.lien ? " · 💛 lien" : ""}</span>
         ${r.aAdapter ? `<span class="tag warn">À adapter selon l'âge</span>` : ""}
+        ${r.plusGrand && !r.aAdapter ? `<span class="tag grand">⬆️ Pour plus grand</span>` : ""}
         ${r.raisons && r.raisons.length ? `<span class="why">✨ ${esc(r.raisons[0])}</span>` : ""}
       </span>
     </button>`;
@@ -278,7 +290,10 @@
             <h2>${esc(k.nom)}</h2>
             <p class="muted">${ageTexte(k)}${t ? " · repères « " + t.label + " »" : ""}</p>
           </div>
-          <button class="btn small ghost" data-action="edit-child" data-id="${k.id}">✏️ Profil</button>
+          <div class="child-actions">
+            <button class="btn small ghost" data-action="quiz-start" data-id="${k.id}">✨ Pas à pas</button>
+            <button class="btn small ghost" data-action="edit-child" data-id="${k.id}">✏️ Profil</button>
+          </div>
         </div>
         ${tags.length ? `<div class="tags">${tags.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div>` : ""}
         <div class="pistes">
@@ -291,7 +306,14 @@
         </div>
       </article>`;
     }).join("");
-    return `${bandeauSauvegarde()}<p class="intro">Les informations saisies restent <strong>uniquement sur cet appareil</strong>. Plus le profil est complet, plus les propositions sont personnalisées.</p>
+    const aCompleter = state.enfants.filter(k => !k.naissance || !k.temperament);
+    const bienvenue = aCompleter.length ? `<div class="card welcome">
+        <div class="welcome-emb">${aCompleter.map(k => avatar(k, "lg")).join("")}</div>
+        <h2>Bienvenue 👋</h2>
+        <p>Remplissons ${aCompleter.length > 1 ? "les profils de " + esc(nomsKids(aCompleter)) : "le profil de " + esc(aCompleter[0].nom)} ensemble, une question à la fois. Environ 2 minutes par enfant, et chaque question peut être passée.</p>
+        <button class="btn primary" data-action="quiz-start" data-id="${aCompleter.map(k => k.id).join(",")}">Commencer</button>
+      </div>` : "";
+    return `${bandeauSauvegarde()}${bienvenue}<p class="intro">Les informations saisies restent <strong>uniquement sur cet appareil</strong>. Plus le profil est complet, plus les propositions sont personnalisées.</p>
       ${cards}
       <button class="btn block ghost" data-action="add-child">➕ Ajouter un enfant</button>`;
   }
@@ -345,6 +367,10 @@
         <label>Ce qui l'apaise<textarea name="apaise" rows="2" placeholder="Ex. : son doudou, une chanson, être porté…">${esc(k.apaise)}</textarea></label>
         <label>Peurs ou sensibilités<textarea name="peurs" rows="2" placeholder="Ex. : bruits forts, le noir, l'eau sur le visage…">${esc(k.peurs)}</textarea></label>
       </fieldset>
+      <fieldset><legend>Niveau des activités proposées</legend>
+        <div class="field">${chipsChoix("avance", AVANCES, String(k.avance || 0))}</div>
+        <p class="hint">Si votre enfant fait souvent des activités de plus grand, l'application lui en proposera aussi (marquées « ⬆️ Pour plus grand »). Les repères de développement restent ceux de son âge réel.</p>
+      </fieldset>
       <fieldset><legend>Ce que vous souhaitez encourager</legend>
         ${chipsChoix("aEncourager", Object.fromEntries(Object.entries(DOMAINES).map(([id, d]) => [id, d.emoji + " " + d.label])), k.aEncourager, true)}
       </fieldset>
@@ -380,11 +406,89 @@
     k.interets = fd.getAll("interets");
     k.aEncourager = fd.getAll("aEncourager");
     k.eau = parseInt(fd.get("eau") || "0", 10);
+    k.avance = parseInt(fd.get("avance") || "0", 10);
     if (isNew) state.enfants.push(k);
     save();
     closeModal();
     toast("Profil de " + k.nom + " enregistré ✓");
     render();
+  }
+
+  // ───────────────────────── Questionnaire pas à pas ─────────────────────────
+  const QUIZ = [
+    { id: "naissance", titre: k => "Date de naissance de " + k.nom, aide: "Sert à proposer des activités et des repères adaptés à son âge." },
+    { id: "temperament", titre: k => "Au quotidien, " + k.nom + " est plutôt…" },
+    { id: "sociabilite", titre: k => "Avec les personnes qu'il ou elle connaît peu, " + k.nom + " est…" },
+    { id: "interets", titre: k => "Qu'est-ce qui plaît à " + k.nom + " ?", aide: "Plusieurs choix possibles. Pour un bébé, ce qui l'attire ou le calme." },
+    { id: "aEncourager", titre: k => "Qu'aimeriez-vous encourager chez " + k.nom + " en ce moment ?", aide: "Plusieurs choix possibles. Les propositions mettront ces domaines en avant." },
+    { id: "avance", titre: k => "Quel niveau d'activités proposer à " + k.nom + " ?", aide: "S'il fait souvent des activités de plus grand, choisissez un niveau au-dessus : les repères de développement resteront ceux de son âge réel." },
+    { id: "eau", titre: k => "Dans l'eau, " + k.nom + " en est où ?" },
+    { id: "apaise", titre: k => "Qu'est-ce qui apaise " + k.nom + " ? Et ce qui l'inquiète ?", aide: "Facultatif : doudou, chanson, bercement… peurs, bruits, le noir…" }
+  ];
+
+  function vueQuiz() {
+    const q = ui.quiz;
+    const k = child(q.ids[q.idx]);
+    const etape = QUIZ[q.step];
+    const total = QUIZ.length;
+    let champ = "";
+    switch (etape.id) {
+      case "naissance": champ = `<input class="big-input" type="date" name="naissance" value="${esc(k.naissance)}" max="${today()}">`; break;
+      case "temperament": champ = chipsChoix("temperament", TEMPERAMENTS, k.temperament); break;
+      case "sociabilite": champ = chipsChoix("sociabilite", SOCIABILITE, k.sociabilite); break;
+      case "interets": champ = chipsChoix("interets", INTERETS, k.interets, true); break;
+      case "aEncourager": champ = chipsChoix("aEncourager", Object.fromEntries(Object.entries(DOMAINES).map(([id, d]) => [id, d.emoji + " " + d.label])), k.aEncourager, true); break;
+      case "avance": champ = chipsChoix("avance", AVANCES, String(k.avance || 0)); break;
+      case "eau": champ = `${chipsChoix("eau", Object.fromEntries(window.NIVEAUX_EAU.map(n => [String(n.niveau), n.label])), String(k.eau || 0))}
+        <p class="muted small">${window.NIVEAUX_EAU.map(n => `<b>${n.label}</b> : ${n.desc}`).join("<br>")}</p>`; break;
+      case "apaise": champ = `<label>Ce qui l'apaise<textarea name="apaise" rows="2">${esc(k.apaise)}</textarea></label>
+        <label>Peurs ou sensibilités<textarea name="peurs" rows="2">${esc(k.peurs)}</textarea></label>`; break;
+    }
+    return `<form data-form="quiz" class="form quiz">
+      <div class="quiz-head">${avatar(k, "lg")}<div><strong>${esc(k.nom)}</strong><span class="muted small">Question ${q.step + 1} sur ${total}${q.ids.length > 1 ? ` · enfant ${q.idx + 1} sur ${q.ids.length}` : ""}</span></div></div>
+      <div class="progress"><span style="width:${Math.round(100 * q.step / total)}%"></span></div>
+      <h2 class="q">${esc(etape.titre(k))}</h2>
+      ${etape.aide ? `<p class="muted">${esc(etape.aide)}</p>` : ""}
+      <div class="quiz-champ">${champ}</div>
+      <div class="form-actions">
+        ${q.step > 0 ? `<button type="button" class="btn ghost" data-action="quiz-back">← Retour</button>` : `<button type="button" class="btn ghost" data-action="close-modal">Plus tard</button>`}
+        <button type="button" class="btn ghost" data-action="quiz-skip">Passer</button>
+        <button type="submit" class="btn primary">${q.step === total - 1 ? "Terminer" : "Suivant →"}</button>
+      </div>
+    </form>`;
+  }
+
+  function vueQuizFin() {
+    const q = ui.quiz;
+    const k = child(q.ids[q.idx]);
+    const suivant = child(q.ids[q.idx + 1]);
+    const reco = recommander([k], {}, 0.61).slice(0, 3);
+    return `<div class="form quiz">
+      <div class="quiz-head">${avatar(k, "lg")}<div><strong>Profil de ${esc(k.nom)} complété 🎉</strong><span class="muted small">Vous pourrez tout modifier plus tard dans « ✏️ Profil ».</span></div></div>
+      <h3>Premières idées pour ${esc(k.nom)}</h3>
+      ${listeActivites(reco, [k])}
+      <div class="form-actions">
+        ${suivant ? `<button class="btn primary" data-action="quiz-next-child">Continuer avec ${esc(suivant.nom)} →</button>` : `<button class="btn primary" data-action="quiz-done">Terminer</button>`}
+      </div>
+    </div>`;
+  }
+
+  function enregistrerQuiz(form) {
+    const q = ui.quiz;
+    const k = child(q.ids[q.idx]);
+    const fd = new FormData(form);
+    const id = QUIZ[q.step].id;
+    if (id === "interets" || id === "aEncourager") k[id] = fd.getAll(id);
+    else if (id === "eau" || id === "avance") k[id] = parseInt(fd.get(id) || "0", 10);
+    else if (id === "apaise") { k.apaise = (fd.get("apaise") || "").trim(); k.peurs = (fd.get("peurs") || "").trim(); }
+    else if (fd.get(id) !== null) k[id] = fd.get(id);
+    save();
+  }
+
+  function quizAvancer() {
+    const q = ui.quiz;
+    if (q.step < QUIZ.length - 1) { q.step++; openModal(vueQuiz()); }
+    else { render(); openModal(vueQuizFin()); }
   }
 
   // ───────────────────────── Onglet : Développement ─────────────────────────
@@ -412,12 +516,16 @@
         <button class="btn small ghost" data-action="dev-offset" data-v="1" ${idx === window.TRANCHES.length - 1 ? "disabled" : ""}>›</button>
       </div>` : `<p class="hint">👉 Renseignez la date de naissance de ${esc(k.nom)} pour voir les repères de son âge.</p>`;
 
-    const checklist = (items, prefix) => `<ul class="checklist">${items.map(txt => {
-      const key = prefix + "|" + txt;
-      return `<li><label><input type="checkbox" data-action="toggle-acquis" data-key="${esc(key)}" ${k.acquis[key] ? "checked" : ""}><span>${esc(txt)}</span></label></li>`;
-    }).join("")}</ul>`;
+    const SRC = window.SOURCES_REPERES;
+    const checklist = (items, prefix) => (items && items.length) ? `<ul class="checklist">${items.map(it => {
+      const key = prefix + "|" + it.t;
+      const badges = (it.s || []).map(c => `<abbr class="src" title="${esc(SRC[c].nom)}">${c}</abbr>`).join("");
+      return `<li><label><input type="checkbox" data-action="toggle-acquis" data-key="${esc(key)}" ${k.acquis[key] ? "checked" : ""}><span>${esc(it.t)} ${badges}</span></label></li>`;
+    }).join("")}</ul>` : `<p class="muted">Pas de repère vérifié pour ce domaine à cet âge dans l'application.</p>`;
 
-    const disclaimer = `<p class="disclaimer">Repères indicatifs : chaque enfant avance à son rythme et des écarts de plusieurs mois sont courants. En cas de question, parlez-en à votre médecin ou pédiatre.</p>`;
+    const disclaimer = `<p class="disclaimer">Repères indicatifs, pas des normes : chaque enfant avance à son rythme. Les lettres renvoient aux sources (bas de page). En cas de question, parlez-en à votre médecin ou pédiatre, qui dispose de la grille de repérage de la Haute Autorité de santé (2020).</p>`;
+    const sources = `<details class="card soft sources"><summary>📚 Sources des repères</summary><ul>${Object.entries(SRC).map(([c, x]) => `<li><abbr class="src">${c}</abbr> <a href="${x.url}" target="_blank" rel="noopener">${esc(x.nom)}</a> — ${esc(x.note)}</li>`).join("")}</ul>
+      <p class="muted small">Repères recoupés entre ces sources en septembre 2026. Ils peuvent évoluer : vérifiez auprès des sources officielles.</p></details>`;
     const conseils = key => window.CONSEILS[key] ? `<div class="card soft"><h3>💡 Conseils</h3><ul class="tips">${window.CONSEILS[key].map(c => `<li>${esc(c)}</li>`).join("")}</ul></div>` : "";
 
     if (d.section === "motricite" && d.sub === "aquatique") {
@@ -438,7 +546,8 @@
         ${t ? `<div class="card"><h3>🤸 Ce qui se met souvent en place</h3>${checklist(t.reperes.motricite, t.id + "|motricite")}${disclaimer}</div>` : ""}
         ${conseils(d.sub)}
         <h3 class="section-title">Activités motrices · ${SUBS.motricite[d.sub]}</h3>
-        ${listeActivites(recommander([k], { lieu: d.sub, domaines: ["motricite_globale", "motricite_fine"] }, 0.13), [k])}`;
+        ${listeActivites(recommander([k], { lieu: d.sub, domaines: ["motricite_globale", "motricite_fine"] }, 0.13), [k])}
+        ${t ? sources : ""}`;
     } else {
       const domaines = { langage: ["langage"], cognitif: ["cognitif"], emotions: ["emotions", "social"], creativite: ["creativite"] }[d.sub];
       const cleReperes = { langage: "langage", cognitif: "cognitif", emotions: "emotions" }[d.sub];
@@ -446,7 +555,8 @@
         ${t && cleReperes ? `<div class="card"><h3>${SUBS.mental[d.sub]} : ce qui se met souvent en place</h3>${checklist(t.reperes[cleReperes], t.id + "|" + cleReperes)}${disclaimer}</div>` : ""}
         ${conseils(d.sub)}
         <h3 class="section-title">Activités · ${SUBS.mental[d.sub]}</h3>
-        ${listeActivites(recommander([k], { domaines }, 0.29), [k])}`;
+        ${listeActivites(recommander([k], { domaines }, 0.29), [k])}
+        ${t && cleReperes ? sources : ""}`;
     }
     return selecteur + sections + subs + contenu;
   }
@@ -456,7 +566,7 @@
     const w = ui.wiz;
     const kids = kidsFor(w.who);
     const fil = [];
-    if (w.who) fil.push(`<button class="crumb" data-action="wiz-goto" data-v="1">${w.who === "tous" ? "👨‍👩‍👧‍👦 " + esc(nomsKids(kids)) : nomAvecEmbleme(kids[0])}</button>`);
+    if (w.who) fil.push(`<button class="crumb" data-action="wiz-goto" data-v="1">${w.who === "tous" ? kids.map(k => `<span class="inline-emb">${embleme(k)}</span>`).join("") + " " + esc(nomsKids(kids)) : nomAvecEmbleme(kids[0])}</button>`);
     if (w.moment) fil.push(`<button class="crumb" data-action="wiz-goto" data-v="2">${MOMENTS[w.moment].emoji} ${MOMENTS[w.moment].label}</button>`);
     if (w.lieu) fil.push(`<button class="crumb" data-action="wiz-goto" data-v="3">${w.lieu === "tous" ? "✨ Peu importe" : LIEUX[w.lieu].emoji + " " + LIEUX[w.lieu].label}</button>`);
     const filHtml = fil.length ? `<div class="crumbs">${fil.join("<span>›</span>")}</div>` : "";
@@ -466,7 +576,7 @@
     if (w.step === 1) {
       body = `<h2 class="q">Pour qui ?</h2><div class="choice-grid">
         ${state.enfants.map(k => `<button class="choice" data-action="wiz-who" data-v="${k.id}">${avatar(k, "lg")}<strong>${esc(k.nom)}</strong><span class="muted">${ageTexte(k)}</span></button>`).join("")}
-        ${state.enfants.length > 1 ? `<button class="choice" data-action="wiz-who" data-v="tous"><span class="avatar lg" style="--c:#f97316">👨‍👩‍👧‍👦</span><strong>${state.enfants.length === 2 ? "Les deux" : "Tous ensemble"}</strong><span class="muted">${esc(nomsKids(state.enfants))}</span></button>` : ""}
+        ${state.enfants.length > 1 ? `<button class="choice" data-action="wiz-who" data-v="tous"><span class="duo">${state.enfants.slice(0, 3).map(k => avatar(k, "lg")).join("")}</span><strong>${state.enfants.length === 2 ? "Les deux" : "Tous ensemble"}</strong><span class="muted">${esc(nomsKids(state.enfants))}</span></button>` : ""}
       </div>`;
     } else if (w.step === 2) {
       body = `<h2 class="q">Quel type de moment ?</h2><div class="choice-grid">
@@ -953,21 +1063,105 @@
     }
   }
 
+  // ── Import : fusion (recommandée) ou remplacement ──
+  let importEnAttente = null;
+
   function importer(file) {
     const reader = new FileReader();
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result);
         if (!data || !Array.isArray(data.enfants)) throw new Error("format");
-        if (!confirm("Remplacer les données actuelles par cette sauvegarde ?")) return;
-        state = migrate(data);
-        save();
-        closeModal();
-        toast("Sauvegarde importée ✓");
-        render();
+        importEnAttente = migrate(data);
+        const d = importEnAttente;
+        openModal(`<div class="form">
+          <h2>⬆️ Importer une sauvegarde</h2>
+          <p>Ce fichier contient : <strong>${d.enfants.map(k => esc(k.nom)).join(", ") || "aucun enfant"}</strong>,
+            ${d.journal.length} souvenir${d.journal.length > 1 ? "s" : ""}, ${d.bibliotheque.length} livre${d.bibliotheque.length > 1 ? "s" : ""} ou comptine${d.bibliotheque.length > 1 ? "s" : ""}, ${d.routines.length} routine${d.routines.length > 1 ? "s" : ""}.</p>
+          <div class="form-actions stack">
+            <button class="btn primary" data-action="import-fusion">🔀 Fusionner avec ce téléphone (recommandé)</button>
+            <p class="muted small">Ajoute ce qui manque et complète les profils, sans rien effacer. Les enfants de même prénom sont regroupés.</p>
+            <button class="btn danger ghost" data-action="import-remplacer">Remplacer toutes les données de ce téléphone</button>
+            <button class="btn ghost" data-action="close-modal">Annuler</button>
+          </div>
+        </div>`);
       } catch (e) { toast("⚠️ Fichier invalide."); }
     };
     reader.readAsText(file);
+  }
+
+  const vide = v => v === undefined || v === null || v === "" || (Array.isArray(v) && !v.length);
+  const union = (a, b) => [...new Set([...(a || []), ...(b || [])])];
+
+  /* Fusionne la sauvegarde importée dans l'état local, sans rien supprimer. */
+  function fusionner(local, imp) {
+    const stats = { enfants: 0, souvenirs: 0, livres: 0, routines: 0 };
+    const idEnfant = {};
+    for (const ki of imp.enfants) {
+      let kl = local.enfants.find(k => k.id === ki.id) ||
+        local.enfants.find(k => k.nom.trim().toLowerCase() === ki.nom.trim().toLowerCase());
+      if (!kl) { local.enfants.push(ki); idEnfant[ki.id] = ki.id; stats.enfants++; continue; }
+      idEnfant[ki.id] = kl.id;
+      for (const [cle, val] of Object.entries(ki)) {
+        if (["id", "nom", "acquis"].includes(cle)) continue;
+        if (Array.isArray(val)) kl[cle] = union(kl[cle], val);
+        else if (vide(kl[cle]) || (typeof val === "number" && val > (kl[cle] || 0))) kl[cle] = val;
+      }
+      for (const [cle, date] of Object.entries(ki.acquis || {})) {
+        if (!kl.acquis[cle] || date < kl.acquis[cle]) kl.acquis[cle] = date;
+      }
+    }
+    const mapEnfants = ids => union([], (ids || []).map(id => idEnfant[id] || id)).filter(id => local.enfants.some(k => k.id === id));
+
+    const signature = j => [j.date, j.activiteId, j.titre, j.note].join("|");
+    for (const j of imp.journal) {
+      if (local.journal.some(x => x.id === j.id || signature(x) === signature(j))) continue;
+      local.journal.push({ ...j, enfants: mapEnfants(j.enfants) });
+      stats.souvenirs++;
+    }
+    local.favoris = union(local.favoris, imp.favoris);
+
+    for (const b of imp.bibliotheque) {
+      const bl = local.bibliotheque.find(x => x.id === b.id || (x.type === b.type && x.titre.trim().toLowerCase() === b.titre.trim().toLowerCase()));
+      if (!bl) { local.bibliotheque.push({ ...b, enfants: mapEnfants(b.enfants) }); stats.livres++; continue; }
+      bl.lectures = Math.max(bl.lectures || 0, b.lectures || 0);
+      if ((b.derniere || "") > (bl.derniere || "")) bl.derniere = b.derniere;
+      bl.coeur = bl.coeur || b.coeur;
+      if (b.statut === "fait") bl.statut = "fait";
+      bl.enfants = union(bl.enfants, mapEnfants(b.enfants));
+      if (!bl.note) bl.note = b.note;
+      if (!bl.auteur) bl.auteur = b.auteur;
+    }
+
+    const idRoutine = {};
+    for (const r of imp.routines) {
+      const enfantId = idEnfant[r.enfantId] || r.enfantId;
+      const rl = local.routines.find(x => x.id === r.id || (x.enfantId === enfantId && x.nom === r.nom));
+      if (rl) { idRoutine[r.id] = rl.id; continue; }
+      local.routines.push({ ...r, enfantId });
+      idRoutine[r.id] = r.id;
+      stats.routines++;
+    }
+    for (const [cle, faites] of Object.entries(imp.routineLog)) {
+      const [date, rid] = cle.split("|");
+      const r = local.routines.find(x => x.id === (idRoutine[rid] || rid));
+      if (!r) continue;
+      const k2 = date + "|" + r.id;
+      // Les étapes d'une routine regroupée par nom n'ont pas les mêmes identifiants : on ne garde que celles qui existent.
+      local.routineLog[k2] = union(local.routineLog[k2], faites.filter(id => r.etapes.some(e => e.id === id)));
+    }
+
+    for (const [semaine, liste] of Object.entries(imp.defis)) {
+      if (!local.defis[semaine]) { local.defis[semaine] = liste; continue; }
+      for (const d of liste) {
+        const dl = local.defis[semaine].find(x => x.id === d.id);
+        if (!dl) { local.defis[semaine].push(d); continue; }
+        dl.jours = union(dl.jours, d.jours);
+        dl.fois = Math.max(dl.fois || 0, d.fois || 0);
+      }
+    }
+    if ((imp.derniereSauvegarde || "") > (local.derniereSauvegarde || "")) local.derniereSauvegarde = imp.derniereSauvegarde;
+    return stats;
   }
 
   // ───────────────────────── Modale ─────────────────────────
@@ -1007,6 +1201,11 @@
     "open-settings": () => openModal(renderReglages()),
     "close-modal": () => closeModal(),
     "edit-child": el => openModal(formEnfant(child(el.dataset.id))),
+    "quiz-start": el => { ui.quiz = { ids: el.dataset.id.split(",").filter(child), idx: 0, step: 0 }; if (ui.quiz.ids.length) openModal(vueQuiz()); },
+    "quiz-back": () => { ui.quiz.step = Math.max(0, ui.quiz.step - 1); openModal(vueQuiz()); },
+    "quiz-skip": () => quizAvancer(),
+    "quiz-next-child": () => { ui.quiz.idx++; ui.quiz.step = 0; openModal(vueQuiz()); },
+    "quiz-done": () => { closeModal(); render(); toast("Profils enregistrés ✓ Pensez à faire une sauvegarde."); },
     "add-child": () => { brouillonEnfant = newChild("", AVATARS[state.enfants.length % AVATARS.length], COULEURS[state.enfants.length % COULEURS.length]); openModal(formEnfant(brouillonEnfant)); },
     "delete-child": el => {
       const k = child(el.dataset.id);
@@ -1064,6 +1263,25 @@
       save(); closeModal(); render();
     },
     "export": () => exporter(),
+    "import-fusion": () => {
+      if (!importEnAttente) return;
+      const st = fusionner(state, importEnAttente);
+      importEnAttente = null;
+      save(); closeModal(); render();
+      const parts = [];
+      if (st.enfants) parts.push(st.enfants + " enfant(s)");
+      if (st.souvenirs) parts.push(st.souvenirs + " souvenir(s)");
+      if (st.livres) parts.push(st.livres + " livre(s)/comptine(s)");
+      if (st.routines) parts.push(st.routines + " routine(s)");
+      toast("Fusion terminée ✓ " + (parts.length ? "Ajouté : " + parts.join(", ") : "Profils complétés"));
+    },
+    "import-remplacer": () => {
+      if (!importEnAttente || !confirm("Remplacer TOUTES les données de ce téléphone par cette sauvegarde ?")) return;
+      state = importEnAttente;
+      importEnAttente = null;
+      save(); closeModal(); render();
+      toast("Sauvegarde importée ✓");
+    },
     "share": () => partager(),
 
     // Famille
@@ -1170,6 +1388,7 @@
   document.addEventListener("submit", e => {
     const f = e.target;
     if (f.dataset.form === "child") { e.preventDefault(); saveChildForm(f); }
+    if (f.dataset.form === "quiz") { e.preventDefault(); enregistrerQuiz(f); quizAvancer(); }
     if (f.dataset.form === "entry") { e.preventDefault(); saveEntryForm(f); }
     if (f.dataset.form === "book") { e.preventDefault(); saveBookForm(f); }
     if (f.dataset.form === "step-custom") {

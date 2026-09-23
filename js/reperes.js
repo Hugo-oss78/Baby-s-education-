@@ -1,89 +1,179 @@
 /*
- * Repères de développement indicatifs.
- * Ce ne sont PAS des normes : chaque enfant avance à son rythme et les écarts
- * de plusieurs mois sont fréquents. En cas de doute, en parler au médecin
- * ou au pédiatre (le carnet de santé contient aussi des repères).
+ * Repères de développement, recoupés avec des sources publiques (voir window.SOURCES_REPERES).
+ * Chaque repère indique ses sources : lettres de SOURCES_REPERES.
+ * Ce ne sont PAS des normes : chaque enfant avance à son rythme.
+ * Les repères du CDC décrivent ce que font environ 3 enfants sur 4 à l'âge indiqué.
  */
+window.SOURCES_REPERES = {
+  C: { nom: "CDC – « Learn the Signs. Act Early. » (repères révisés en 2022)", note: "ce que font environ 3 enfants sur 4 à cet âge", url: "https://www.cdc.gov/act-early/milestones/index.html" },
+  S: { nom: "Santé.fr – service public d'information en santé", note: "fiches « développement psychomoteur »", url: "https://www.sante.fr/le-developpement-psychomoteur-des-enfants-de-6-9-mois" },
+  M: { nom: "mpedia.fr – Association française de pédiatrie ambulatoire (AFPA)", note: "fiches « développement » par âge", url: "https://www.mpedia.fr/art-developpement-de-lenfant-3-a-4-ans/" },
+  O: { nom: "OMS – WHO Motor Development Study (2006)", note: "fenêtres d'acquisition de la motricité (4 à 24 mois)", url: "https://www.rti.org/publication/motor-development-study-windows-achievement-six-gross-motor-development-milestones" },
+  P: { nom: "Les pros de la petite enfance – « Les grandes étapes du développement psychomoteur »", note: "source secondaire", url: "https://www.lesprosdelapetiteenfance.fr/article/les-grandes-etapes-du-developpement-psychomoteur-de-lenfant/" }
+};
+
 window.TRANCHES = [
   {
-    id: "0-6m", min: 0, max: 6, label: "0 – 6 mois",
+    id: "v-0-4m", min: 0, max: 4, label: "Premiers mois",
     focus: "Sécurité affective, regards, voix, contact. Le jeu, c'est vous !",
+    reperes: {}
+  },
+  {
+    id: "v-6m", min: 4, max: 8, label: "Vers 6 mois",
+    focus: "Laisser bébé bouger librement au sol, lui parler et lui répondre, lui proposer des objets à attraper et à porter à la bouche (en toute sécurité).",
     reperes: {
-      motricite: ["Tient de mieux en mieux sa tête", "Sur le ventre, se soulève sur les avant-bras", "Attrape un objet qu'on lui tend", "Porte les mains et les objets à la bouche"],
-      langage: ["Réagit aux voix et aux bruits", "Gazouille, fait des vocalises", "Rit aux éclats"],
-      cognitif: ["Suit un visage ou un objet des yeux", "S'intéresse à ses mains"],
-      emotions: ["Sourit en réponse à un sourire", "Se calme quand on le prend ou lui parle"]
+      motricite: [
+        { t: "Se retourne du ventre sur le dos", s: ["C", "M"] },
+        { t: "Sur le ventre, se redresse en appui sur les bras", s: ["C", "M"] },
+        { t: "Tient assis avec un appui (ou en s'aidant de ses mains)", s: ["C", "M"] },
+        { t: "Attrape un jouet qu'il veut", s: ["C"] }
+      ],
+      langage: [
+        { t: "Babille de plus en plus, seul ou pour vous appeler", s: ["M"] },
+        { t: "Fait des sons chacun son tour avec vous", s: ["C"] },
+        { t: "Pousse des petits cris aigus, fait des « prouts » avec la bouche", s: ["C"] }
+      ],
+      cognitif: [
+        { t: "Porte les objets à la bouche pour les découvrir", s: ["C"] },
+        { t: "Ferme la bouche pour montrer qu'il n'en veut plus", s: ["C"] }
+      ],
+      emotions: [
+        { t: "Reconnaît les personnes familières", s: ["C"] },
+        { t: "Aime se regarder dans un miroir, sourit à son reflet", s: ["C", "M"] },
+        { t: "Rit", s: ["C"] }
+      ]
     }
   },
   {
-    id: "6-12m", min: 6, max: 12, label: "6 – 12 mois",
-    focus: "Exploration : laisser bouger au sol, nommer tout ce qu'il touche, jeux de coucou.",
+    id: "v-9m", min: 8, max: 11, label: "Vers 9 mois",
+    focus: "Exploration : de l'espace au sol pour se déplacer, nommer tout ce qu'il touche, jeux de coucou et d'objets cachés.",
     reperes: {
-      motricite: ["Se retourne dans les deux sens", "Tient assis sans appui", "Se déplace (ramper, quatre pattes, fesses…)", "Attrape de petits objets entre le pouce et l'index"],
-      langage: ["Babille en syllabes (« ba-ba », « ma-ma »)", "Réagit à son prénom", "Comprend « non » et quelques mots familiers"],
-      cognitif: ["Cherche un objet caché sous un tissu", "Tape deux objets l'un contre l'autre"],
-      emotions: ["Fait la différence entre proches et inconnus", "Peut montrer de l'inquiétude à la séparation"]
+      motricite: [
+        { t: "Tient assis seul (souvent entre 7 et 9 mois)", s: ["S", "O"] },
+        { t: "Se déplace au sol : rampe, quatre pattes, sur les fesses…", s: ["S"] },
+        { t: "Commence à attraper entre le pouce et l'index (la « pince »)", s: ["S"] }
+      ],
+      langage: [
+        { t: "Babille en répétant des syllabes (« ba-ba », « ma-ma »)", s: ["S"] }
+      ],
+      cognitif: [
+        { t: "Cherche un objet qui tombe ou qui disparaît de sa vue", s: ["C"] }
+      ],
+      emotions: []
     }
   },
   {
-    id: "12-24m", min: 12, max: 24, label: "1 – 2 ans",
-    focus: "Marche et langage explosent : environnement sûr pour explorer, lire beaucoup, mettre des mots sur les émotions.",
+    id: "v-12m", min: 11, max: 15, label: "Vers 12 mois",
+    focus: "Premiers pas et premiers mots : sécuriser la maison, commenter ce qu'il regarde, lire des imagiers.",
     reperes: {
-      motricite: ["Marche seul (l'âge varie beaucoup)", "Monte des escaliers en étant tenu", "Empile quelques cubes", "Gribouille avec un crayon"],
-      langage: ["Dit ses premiers mots, puis de plus en plus", "Montre du doigt ce qui l'intéresse", "Comprend des consignes simples (« donne-moi »)"],
-      cognitif: ["Imite les gestes du quotidien (téléphoner, balayer)", "Encastre des formes simples"],
-      emotions: ["Veut faire « tout seul »", "Premières grosses colères : il a besoin de vous pour se calmer"]
+      motricite: [
+        { t: "Se met debout en se tenant", s: ["C", "S"] },
+        { t: "Marche en se tenant aux meubles", s: ["C"] },
+        { t: "Se déplace à quatre pattes ou en rampant", s: ["S"] }
+      ],
+      langage: [
+        { t: "Fait « au revoir » de la main", s: ["C"] },
+        { t: "Premiers mots (souvent entre 9 et 12 mois)", s: ["S"] }
+      ],
+      cognitif: [],
+      emotions: []
     }
   },
   {
-    id: "2-3a", min: 24, max: 36, label: "2 – 3 ans",
-    focus: "Âge du « non » et du « moi tout seul » : proposer des choix, encourager l'autonomie, jeux de faire-semblant.",
+    id: "v-18m", min: 15, max: 21, label: "Vers 18 mois",
+    focus: "Il veut faire seul : laisser essayer (cuillère, verre), nommer les parties du corps, jouer à imiter les gestes du quotidien.",
     reperes: {
-      motricite: ["Court, grimpe, tape dans un ballon", "Saute à pieds joints", "Tourne les pages d'un livre", "Enfile de grosses perles"],
-      langage: ["Associe deux ou trois mots, puis fait de petites phrases", "Dit son prénom", "Pose des questions (« c'est quoi ? »)"],
-      cognitif: ["Joue à faire semblant (dînette, poupée)", "Trie par couleur ou par forme"],
-      emotions: ["Joue à côté des autres enfants, puis avec eux", "Commence à nommer quelques émotions"]
+      motricite: [
+        { t: "Marche sans se tenir (l'OMS observe cette acquisition entre environ 8 et 18 mois)", s: ["C", "O"] },
+        { t: "Commence à boire au verre et à utiliser la cuillère", s: ["P"] }
+      ],
+      langage: [
+        { t: "Essaie de dire au moins 3 mots en plus de « maman » / « papa »", s: ["C"] },
+        { t: "Utilise des mots isolés qui veulent dire une phrase (« maman » = « le sac de maman »)", s: ["P"] }
+      ],
+      cognitif: [
+        { t: "Imite vos tâches du quotidien (balayer, ranger…)", s: ["C"] },
+        { t: "Montre son nez, sa bouche… quand on le lui demande", s: ["P"] }
+      ],
+      emotions: [
+        { t: "S'éloigne un peu de vous en vérifiant que vous êtes là", s: ["C"] }
+      ]
     }
   },
   {
-    id: "3-4a", min: 36, max: 48, label: "3 – 4 ans",
+    id: "v-2a", min: 21, max: 30, label: "Vers 2 ans",
+    focus: "Le langage décolle : lire beaucoup, reformuler ses phrases, proposer des choix pour accompagner le « moi tout seul ».",
+    reperes: {
+      motricite: [
+        { t: "Court", s: ["C"] },
+        { t: "Tape dans un ballon", s: ["C"] },
+        { t: "Empile des cubes pour faire une tour", s: ["P"] }
+      ],
+      langage: [
+        { t: "Associe deux mots (« encore lait », « papa parti »)", s: ["C", "P"] },
+        { t: "Montre des choses dans un livre quand on demande (« Où est l'ours ? »)", s: ["C"] }
+      ],
+      cognitif: [
+        { t: "Comprend et suit des consignes simples", s: ["P"] }
+      ],
+      emotions: []
+    }
+  },
+  {
+    id: "v-30m", min: 30, max: 42, label: "Vers 2 ans ½ – 3 ans",
+    focus: "Âge du « moi tout seul » : laisser s'habiller, faire des choix, jouer à faire semblant, beaucoup de mots nouveaux.",
+    reperes: {
+      motricite: [
+        { t: "Se déshabille seul et commence à mettre certains vêtements", s: ["M"] }
+      ],
+      langage: [
+        { t: "Dit environ 50 mots (repère du CDC vers 30 mois)", s: ["C"] }
+      ],
+      cognitif: [],
+      emotions: []
+    }
+  },
+  {
+    id: "v-4a", min: 42, max: 54, label: "3 – 4 ans",
     focus: "Imaginaire et « pourquoi ? » : répondre simplement, inventer des histoires, jeux de règles simples.",
     reperes: {
-      motricite: ["Pédale sur un tricycle ou un vélo à roulettes", "Tient sur un pied quelques secondes", "Dessine un rond, un « bonhomme têtard »", "Utilise des ciseaux adaptés"],
-      langage: ["Fait des phrases complètes, raconte ce qu'il a fait", "Pose beaucoup de « pourquoi ? »", "Est compris par des personnes extérieures à la famille"],
-      cognitif: ["Compte quelques objets", "Connaît plusieurs couleurs", "Comprend « avant / après »"],
-      emotions: ["Joue avec d'autres enfants, commence à partager", "Exprime ses émotions avec des mots (encore avec aide)"]
+      motricite: [
+        { t: "Monte et descend les escaliers en apprenant à alterner les pieds", s: ["M"] },
+        { t: "Saute à pieds joints, essaie de sauter à cloche-pied", s: ["M"] },
+        { t: "Tient sur un pied environ 2 secondes (vers 4 ans)", s: ["C"] },
+        { t: "Attrape un gros ballon la plupart du temps (vers 4 ans)", s: ["C"] },
+        { t: "Commence à découper des formes simples aux ciseaux", s: ["M"] },
+        { t: "Dessine un bonhomme « têtard »", s: ["M"] }
+      ],
+      langage: [
+        { t: "Fait des phrases de plus en plus complètes", s: ["M"] }
+      ],
+      cognitif: [
+        { t: "Se repère dans l'espace (dedans / dehors) et dans le temps (hier / demain)", s: ["M"] }
+      ],
+      emotions: []
     }
   },
   {
-    id: "4-6a", min: 48, max: 72, label: "4 – 6 ans",
+    id: "v-5a", min: 54, max: 72, label: "Vers 5 ans",
     focus: "Règles, coopération, fierté : jeux de société, petites responsabilités, encourager l'effort plutôt que le résultat.",
     reperes: {
-      motricite: ["Saute à cloche-pied", "Attrape un ballon", "Dessine un bonhomme avec plusieurs parties du corps", "Commence à écrire son prénom"],
-      langage: ["Raconte une histoire dans l'ordre", "Joue avec les sons et les rimes", "Utilise le passé et le futur"],
-      cognitif: ["Compte au-delà de 10", "Reconnaît des lettres", "Suit un jeu à règles simples"],
-      emotions: ["Comprend qu'un autre peut ressentir autre chose que lui", "Accepte mieux d'attendre son tour", "Aime rendre service"]
+      motricite: [
+        { t: "Saute à cloche-pied", s: ["C"] }
+      ],
+      langage: [
+        { t: "Raconte une histoire entendue ou inventée, avec au moins deux événements", s: ["C"] }
+      ],
+      cognitif: [
+        { t: "Compte jusqu'à 10", s: ["C"] }
+      ],
+      emotions: []
     }
   },
   {
-    id: "6-8a", min: 72, max: 96, label: "6 – 8 ans",
-    focus: "Apprentissages scolaires : soutenir la lecture plaisir, valoriser la persévérance, laisser de la place au jeu libre.",
-    reperes: {
-      motricite: ["Fait du vélo sans roulettes", "Enchaîne des mouvements (sauter à la corde, dribbler)", "Écrit de façon plus régulière"],
-      langage: ["Apprend à lire et à écrire", "Comprend l'humour et les devinettes", "Argumente pour défendre son point de vue"],
-      cognitif: ["Additionne, soustrait", "Se repère dans la semaine et les mois", "Planifie un petit projet"],
-      emotions: ["Les amitiés prennent de l'importance", "Commence à gérer seul certaines frustrations"]
-    }
-  },
-  {
-    id: "8a+", min: 96, max: 1000, label: "8 ans et plus",
-    focus: "Autonomie et passions : lui confier des projets, l'écouter vraiment, partager vos propres centres d'intérêt.",
-    reperes: {
-      motricite: ["Pratique des sports aux gestes plus précis", "Gestes fins précis (bricolage, instrument)"],
-      langage: ["Lit seul pour le plaisir", "Exprime des idées plus abstraites"],
-      cognitif: ["Raisonne sur des situations plus complexes", "Organise son travail avec un peu d'aide"],
-      emotions: ["Sensible au regard des copains", "Besoin d'autonomie ET de moments complices avec les parents"]
-    }
+    id: "v-6a", min: 72, max: 1000, label: "6 ans et plus",
+    focus: "Autonomie et passions : lui confier des projets, l'écouter vraiment, laisser de la place au jeu libre.",
+    reperes: {}
   }
 ];
 

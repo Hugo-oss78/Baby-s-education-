@@ -575,5 +575,202 @@ window.ACTIVITES = [
     materiel: "Selon la tâche", benefices: "Autonomie, confiance, sentiment d'être utile à la famille.",
     moments: ["complicite", "cerebral"], lieux: ["interieur", "exterieur"], domaines: ["autonomie", "motricite_fine", "social"],
     interets: ["cuisine"], age: [20, 144], duree: 15, lien: true, fratrie: "ok"
+  },
+  // ───────────── AJOUTS : BÉBÉ DE 6 À 12 MOIS ─────────────
+  {
+    id: "miroir-bebe", emoji: "🪞", titre: "Coucou dans le miroir",
+    resume: "Face à un miroir incassable, faire des grimaces, nommer les parties du visage, se cacher et réapparaître.",
+    etapes: ["S'installer avec bébé devant un miroir incassable (au sol ou sur vos genoux).", "Montrer et nommer : « Voilà ton nez ! Voilà maman ! »", "Faire des grimaces lentes : bébé observe et imite parfois.", "Se cacher sur le côté et réapparaître : « Coucou ! »"],
+    materiel: "Miroir incassable", benefices: "Attention au visage, reconnaissance de soi et des proches, premiers échanges.",
+    moments: ["calme", "complicite"], lieux: ["interieur"], domaines: ["emotions", "langage", "cognitif"],
+    interets: [], age: [4, 14], duree: 10, lien: true, fratrie: "ok"
+  },
+  {
+    id: "bouteilles-sensorielles", emoji: "🍶", titre: "Bouteilles sensorielles",
+    resume: "Des petites bouteilles remplies d'eau colorée, de paillettes ou de riz, bien fermées, à faire rouler et secouer.",
+    etapes: ["Remplir 3 petites bouteilles : eau + colorant alimentaire, riz, grelots.", "Coller le bouchon et l'entourer de scotch solide.", "Les faire rouler devant bébé, le laisser les attraper et les secouer."],
+    materiel: "Petites bouteilles, riz, eau, colorant, colle forte, scotch", benefices: "Suivi visuel, écoute, préhension, envie d'aller chercher (motivation à bouger).",
+    securite: "Bouchons collés et scotchés, vérifier régulièrement qu'ils tiennent. Toujours sous surveillance.",
+    moments: ["calme", "cerebral"], lieux: ["interieur"], domaines: ["sensoriel", "motricite_fine", "cognitif"],
+    interets: ["sciences"], age: [5, 18], duree: 10, lien: false, fratrie: "ok"
+  },
+  {
+    id: "jouet-hors-portee", emoji: "🧸", titre: "Le jouet un peu plus loin",
+    resume: "Poser un jouet attrayant juste hors de portée pour donner envie de se tourner, pivoter ou avancer.",
+    etapes: ["Bébé sur le ventre ou assis avec appui, sur un tapis.", "Poser un jouet à quelques centimètres de sa main, puis un peu plus loin ou sur le côté.", "Encourager avec la voix, sans lui donner trop vite : l'effort fait partie du jeu.", "Arrêter s'il s'agace : on réessaiera plus tard."],
+    materiel: "Tapis, jouet coloré ou sonore", benefices: "Retournements, pivots, préparation au déplacement.",
+    securite: "Toujours éveillé et surveillé quand bébé est sur le ventre.",
+    moments: ["sport"], lieux: ["interieur"], domaines: ["motricite_globale", "cognitif"],
+    interets: [], age: [4, 11], duree: 10, lien: true, fratrie: "ok"
+  },
+  {
+    id: "livres-tissu", emoji: "📚", titre: "Livres à toucher",
+    resume: "Livres en tissu ou cartonnés avec des matières, des rabats, des images simples : bébé touche, mâchouille, tourne.",
+    etapes: ["Bébé sur vos genoux, livre devant lui.", "Nommer l'image, faire le bruit de l'animal, guider sa main sur la matière.", "Le laisser manipuler (et goûter) le livre : c'est normal à cet âge."],
+    materiel: "Livres en tissu ou cartonnés", benefices: "Bain de langage, découverte des textures, goût précoce pour les livres.",
+    moments: ["calme", "complicite"], lieux: ["interieur", "trajet"], domaines: ["langage", "sensoriel"],
+    interets: ["livres", "animaux"], age: [4, 20], duree: 10, lien: true, fratrie: "ok"
+  },
+  {
+    id: "tambour-casseroles", emoji: "🥁", titre: "Concert de casseroles",
+    resume: "Casseroles retournées, boîtes et cuillères en bois : taper, écouter la différence de sons.",
+    etapes: ["Installer 2 ou 3 « instruments » devant l'enfant (assis avec appui pour les bébés).", "Taper doucement, puis fort, lentement, puis vite.", "Laisser imiter, puis imiter à votre tour ce qu'il fait."],
+    materiel: "Casseroles, boîtes, cuillères en bois", benefices: "Cause-effet, écoute, coordination, imitation.",
+    moments: ["sport", "creatif", "complicite"], lieux: ["interieur"], domaines: ["sensoriel", "motricite_fine", "cognitif"],
+    interets: ["musique"], age: [6, 48], duree: 10, lien: true, fratrie: "ideal"
+  },
+  {
+    id: "foulards-boite", emoji: "🧣", titre: "La boîte à foulards",
+    resume: "Glisser des foulards légers dans une boîte à mouchoirs vide : bébé les tire un par un.",
+    etapes: ["Nouer ou non des foulards légers, les glisser dans une boîte à mouchoirs vide.", "Montrer comment en tirer un.", "Le laisser vider la boîte, puis remplir ensemble."],
+    materiel: "Boîte à mouchoirs vide, foulards légers", benefices: "Pince pouce-index, cause-effet, concentration.",
+    securite: "Ranger les foulards après le jeu (risque d'étranglement sans surveillance).",
+    moments: ["calme", "cerebral"], lieux: ["interieur"], domaines: ["motricite_fine", "cognitif"],
+    interets: [], age: [7, 18], duree: 10, lien: false, fratrie: "ok"
+  },
+  {
+    id: "pieds-nus", emoji: "🦶", titre: "Pieds nus dans l'herbe",
+    resume: "Découvrir avec les pieds et les mains l'herbe, le sable, les feuilles, la terre.",
+    etapes: ["Choisir un coin propre et sans danger.", "Poser bébé assis ou tenir ses pieds sur l'herbe ; les plus grands marchent pieds nus.", "Nommer : « C'est doux, ça pique, c'est froid ! »"],
+    materiel: "Rien", benefices: "Découvertes sensorielles, équilibre, vocabulaire.",
+    securite: "Vérifier le sol (objets, déjections), rester à côté.",
+    moments: ["calme", "complicite"], lieux: ["exterieur"], domaines: ["sensoriel", "langage", "motricite_globale"],
+    interets: ["nature"], age: [6, 72], duree: 15, lien: true, fratrie: "ideal"
+  },
+  {
+    id: "jeux-doigts", emoji: "🖐️", titre: "Jeux de doigts",
+    resume: "Comptines avec les mains et les doigts : « La petite bête qui monte », « Voici ma main », « Ainsi font font font »…",
+    etapes: ["Face à face ou bébé sur vos genoux.", "Dire la comptine lentement en touchant ses doigts, sa main, son bras.", "Garder un petit suspense avant la chatouille finale."],
+    materiel: "Rien", benefices: "Langage, anticipation, rires partagés.",
+    moments: ["calme", "complicite"], lieux: ["interieur", "trajet", "exterieur"], domaines: ["langage", "emotions"],
+    interets: ["musique"], age: [4, 36], duree: 5, lien: true, fratrie: "ideal"
+  },
+  {
+    id: "bulles-savon", emoji: "🫧", titre: "Bulles de savon",
+    resume: "Souffler des bulles que bébé suit des yeux et que les plus grands essaient d'attraper ou d'éclater.",
+    etapes: ["Souffler doucement des bulles devant l'enfant.", "Bébé : il les suit du regard, tend la main.", "Plus grands : éclater avec un doigt, un pied, compter les bulles."],
+    materiel: "Flacon à bulles", benefices: "Suivi visuel, coordination, émerveillement partagé.",
+    securite: "Garder le flacon hors de portée des petits (ne pas boire le liquide).",
+    moments: ["calme", "sport", "complicite"], lieux: ["exterieur", "interieur"], domaines: ["sensoriel", "motricite_globale"],
+    interets: [], age: [5, 72], duree: 10, lien: true, fratrie: "ideal"
+  },
+  {
+    id: "gobelets-gigognes", emoji: "🥤", titre: "Gobelets à empiler",
+    resume: "Emboîter, empiler, faire tomber des gobelets gigognes (ou des pots de yaourt vides).",
+    etapes: ["Construire une petite tour : bébé adore la faire tomber.", "Cacher un jouet sous un gobelet : où est-il ?", "Plus grands : empiler du plus grand au plus petit."],
+    materiel: "Gobelets gigognes ou pots vides", benefices: "Cause-effet, notion de grand/petit, motricité fine.",
+    moments: ["cerebral", "calme"], lieux: ["interieur", "aquatique"], domaines: ["cognitif", "motricite_fine"],
+    interets: ["construction", "puzzles"], age: [6, 30], duree: 10, lien: false, fratrie: "ideal"
+  },
+  {
+    id: "photos-famille", emoji: "🖼️", titre: "L'album des visages",
+    resume: "Regarder avec bébé des photos de la famille et nommer chacun.",
+    etapes: ["Préparer quelques photos bien nettes (album, téléphone, photos plastifiées).", "Nommer : « C'est papi ! Là, c'est Titi ! »", "Observer ses réactions : sourires, gazouillis, regards."],
+    materiel: "Photos", benefices: "Reconnaissance des proches, langage, sentiment d'appartenance.",
+    moments: ["calme", "complicite"], lieux: ["interieur", "trajet"], domaines: ["langage", "emotions"],
+    interets: [], age: [5, 24], duree: 10, lien: true, fratrie: "ok"
+  },
+  {
+    id: "bain-gant", emoji: "🧽", titre: "Bain-découverte des petits",
+    resume: "Dans le bain, presser une éponge ou un gant pour faire couler l'eau sur les mains, le ventre, les pieds.",
+    etapes: ["Eau à bonne température, bébé bien calé.", "Faire couler l'eau doucement en nommant les parties du corps.", "Lui donner l'éponge : il découvre qu'en serrant, l'eau coule."],
+    materiel: "Éponge ou gant", benefices: "Familiarisation à l'eau, sensations, cause-effet.",
+    securite: "Ne jamais laisser un enfant seul dans le bain, même quelques secondes.",
+    moments: ["calme", "complicite"], lieux: ["aquatique", "interieur"], domaines: ["sensoriel", "emotions"],
+    interets: ["eau"], age: [3, 18], duree: 10, lien: true, fratrie: "ok", eauMin: 0
+  },
+
+  // ───────────── AJOUTS : 2 À 4 ANS ─────────────
+  {
+    id: "enfiler-perles", emoji: "📿", titre: "Enfiler des perles ou des pâtes",
+    resume: "Enfiler de grosses perles ou des pâtes tubes sur un lacet rigide pour faire un collier.",
+    etapes: ["Scotcher le bout du lacet pour le rendre rigide, faire un gros nœud à l'autre bout.", "Commencer par de grosses perles ou des rigatonis.", "Plus grands : suivre un motif de couleurs (rouge, bleu, rouge…)."],
+    materiel: "Lacet, grosses perles ou pâtes tubes", benefices: "Motricité fine, coordination des deux mains, concentration, logique (motifs).",
+    securite: "Petits objets : surveiller de près avant 3 ans.",
+    moments: ["calme", "cerebral", "creatif"], lieux: ["interieur", "trajet"], domaines: ["motricite_fine", "cognitif"],
+    interets: ["puzzles"], age: [30, 72], duree: 15, lien: false, fratrie: "ok"
+  },
+  {
+    id: "pate-serpents", emoji: "🐍", titre: "Serpents et boulettes en pâte à modeler",
+    resume: "Rouler des serpents, faire des boulettes, découper avec un couteau à pâte ou des ciseaux adaptés.",
+    etapes: ["Montrer comment rouler une boule entre les mains, puis un serpent sur la table.", "Découper le serpent en morceaux (couteau à pâte).", "Inventer : un escargot, un nid avec des œufs, un gâteau d'anniversaire."],
+    materiel: "Pâte à modeler, couteau à pâte, ciseaux enfants", benefices: "Force des mains, motricité fine (préparation au dessin), imagination.",
+    moments: ["creatif", "calme"], lieux: ["interieur"], domaines: ["motricite_fine", "creativite"],
+    interets: ["dessin", "cuisine"], age: [24, 72], duree: 20, lien: true, fratrie: "ok"
+  },
+  {
+    id: "apporte-rouge", emoji: "🔴", titre: "Apporte-moi quelque chose de…",
+    resume: "Une mission : trouver dans la maison un objet rouge, rond, doux, plus grand que la cuillère…",
+    etapes: ["Donner une consigne simple : « Apporte-moi quelque chose de rouge ! »", "Célébrer chaque trouvaille en la décrivant.", "Augmenter la difficulté : deux critères (« rouge ET doux »), ou une consigne en deux étapes."],
+    materiel: "Rien", benefices: "Couleurs, vocabulaire, compréhension des consignes, mouvement.",
+    moments: ["cerebral", "sport"], lieux: ["interieur", "exterieur"], domaines: ["langage", "cognitif", "motricite_globale"],
+    interets: ["puzzles"], age: [22, 60], duree: 10, lien: true, fratrie: "ok"
+  },
+  {
+    id: "paires-chaussettes", emoji: "🧦", titre: "La chasse aux paires",
+    resume: "Retrouver les paires de chaussettes dans le linge propre (ou des cartes, des chaussures).",
+    etapes: ["Étaler une dizaine de chaussettes.", "« Trouve la jumelle de celle-ci ! »", "Ranger les paires ensemble dans le tiroir."],
+    materiel: "Linge propre", benefices: "Observation, appariement, sentiment d'être utile.",
+    moments: ["cerebral", "complicite"], lieux: ["interieur"], domaines: ["cognitif", "autonomie"],
+    interets: ["puzzles"], age: [22, 54], duree: 10, lien: true, fratrie: "ok"
+  },
+  {
+    id: "petit-jardinier", emoji: "🪴", titre: "Petit jardinier",
+    resume: "Remplir des pots de terre à la pelle, planter des graines ou des bulbes, arroser.",
+    etapes: ["Installer une bâche ou aller dehors.", "Remplir le pot, faire un trou avec le doigt, déposer la graine.", "Arroser avec un petit arrosoir et poser le pot à un endroit qu'il pourra surveiller."],
+    materiel: "Pots, terreau, graines faciles (radis, haricot, tournesol), arrosoir", benefices: "Motricité, patience, observation du vivant, responsabilité.",
+    moments: ["cerebral", "calme"], lieux: ["exterieur", "interieur"], domaines: ["motricite_fine", "cognitif", "autonomie"],
+    interets: ["nature", "sciences"], age: [22, 96], duree: 25, lien: true, fratrie: "ok"
+  },
+  {
+    id: "rampe-voitures", emoji: "🚗", titre: "La rampe à voitures",
+    resume: "Un carton ou une planche inclinée : faire descendre voitures et balles, comparer qui va le plus loin.",
+    etapes: ["Incliner une planche ou un grand carton contre le canapé.", "Lâcher deux voitures en même temps : laquelle arrive en premier ?", "Changer la pente (plus de coussins) et observer ce qui change."],
+    materiel: "Carton ou planche, petites voitures, balles", benefices: "Premières expériences de physique, prédiction, vocabulaire (vite, lent, loin).",
+    moments: ["cerebral"], lieux: ["interieur"], domaines: ["cognitif", "langage"],
+    interets: ["vehicules", "sciences", "construction"], age: [18, 72], duree: 20, lien: true, fratrie: "ideal"
+  },
+  {
+    id: "flaques", emoji: "🥾", titre: "Sauter dans les flaques",
+    resume: "Bottes et ciré : sauter dans les flaques, comparer les éclaboussures, faire des ronds dans l'eau.",
+    etapes: ["S'équiper : bottes, pantalon de pluie.", "Sauter à pieds joints, en courant, à reculons…", "Jeter un caillou : observer les ronds dans l'eau."],
+    materiel: "Bottes, vêtements de pluie", benefices: "Saut, équilibre, plaisir du dehors par tous les temps.",
+    moments: ["sport", "complicite"], lieux: ["exterieur", "aquatique"], domaines: ["motricite_globale", "sensoriel"],
+    interets: ["eau", "nature"], age: [18, 96], duree: 20, lien: true, fratrie: "ok", eauMin: 0
+  },
+  {
+    id: "danse-foulards", emoji: "💃", titre: "Danse des foulards",
+    resume: "Danser avec des foulards en suivant la musique : lent comme une plume, rapide comme le vent.",
+    etapes: ["Un foulard chacun.", "Alterner musique douce et musique rapide.", "Imiter : « On fait la pluie… le vent… l'oiseau ! »"],
+    materiel: "Foulards légers, musique", benefices: "Coordination, écoute du rythme, expression corporelle.",
+    moments: ["sport", "creatif", "complicite"], lieux: ["interieur", "exterieur"], domaines: ["motricite_globale", "creativite", "sensoriel"],
+    interets: ["danse", "musique"], age: [12, 96], duree: 10, lien: true, fratrie: "ideal"
+  },
+
+  // ───────────── AJOUTS : POUR LES DEUX (GRAND + BÉBÉ) ─────────────
+  {
+    id: "spectacle-bebe", emoji: "🎪", titre: "Le spectacle pour bébé",
+    resume: "Le grand fait un petit spectacle pour le bébé : chanson, marionnette, coucou-caché. Le bébé est le public !",
+    etapes: ["Installer bébé confortablement face au « scène ».", "Aider le grand à choisir : une chanson, une marionnette, un coucou.", "Montrer au grand comment bébé réagit : « Regarde, elle te sourit ! »"],
+    materiel: "Une marionnette ou une peluche", benefices: "Valorise le grand, crée un lien entre frère et sœur, bain de langage pour bébé.",
+    moments: ["complicite", "creatif"], lieux: ["interieur"], domaines: ["social", "emotions", "langage"],
+    interets: ["imaginaire", "musique"], age: [0, 144], duree: 10, lien: true, fratrie: "duo"
+  },
+  {
+    id: "aide-bebe", emoji: "🍼", titre: "Grand assistant de bébé",
+    resume: "Le grand aide pour s'occuper du bébé : apporter la couche, choisir le body, chanter pendant le change.",
+    etapes: ["Proposer une mission simple et facultative (ne pas imposer).", "Le remercier précisément : « Merci d'avoir choisi le body, elle est très jolie avec ! »", "Prévoir aussi un moment rien que pour le grand ensuite."],
+    materiel: "Rien", benefices: "Sentiment d'être important, empathie, relation fraternelle.",
+    moments: ["complicite"], lieux: ["interieur"], domaines: ["social", "autonomie", "emotions"],
+    interets: [], age: [0, 144], duree: 10, lien: true, fratrie: "duo"
+  },
+  {
+    id: "tapis-ensemble", emoji: "🧩", titre: "Tapis d'éveil à deux",
+    resume: "Bébé sur le tapis, le grand à côté : il lui montre des jouets, les fait bouger, les nomme.",
+    etapes: ["Installer les deux sur un grand tapis.", "Donner au grand 2 ou 3 jouets « pour bébé » (hochet, livre en tissu).", "Rester tout près : guider les gestes doux, féliciter."],
+    materiel: "Tapis, jouets de bébé", benefices: "Complicité entre frère et sœur, apprentissage de la douceur.",
+    securite: "Surveiller de près : les jouets du grand peuvent être dangereux pour bébé (petites pièces).",
+    moments: ["calme", "complicite"], lieux: ["interieur"], domaines: ["social", "emotions", "sensoriel"],
+    interets: [], age: [0, 144], duree: 15, lien: true, fratrie: "duo"
   }
 ];
