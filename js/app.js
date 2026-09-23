@@ -57,7 +57,8 @@
   const ui = {
     tab: "enfants",
     dev: { childId: null, section: "motricite", sub: "interieur", offset: 0 },
-    wiz: { step: 1, who: null, moment: null, lieu: null, seed: Math.random(), shown: 3 }
+    wiz: { step: 1, who: null, moment: null, lieu: null, seed: Math.random(), shown: 3 },
+    fam: { sub: "routines", childId: null, bibType: "livre", bibFiltre: "tous" }
   };
 
   function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); }
@@ -71,13 +72,18 @@
   }
 
   function defaultState() {
-    return { version: 1, enfants: [newChild("Titi", "🦁", COULEURS[0]), newChild("Loulou", "🐻", COULEURS[1])], journal: [], favoris: [] };
+    return { version: 1, enfants: [newChild("Titi", "🦁", COULEURS[0]), newChild("Loulou", "🐻", COULEURS[1])], journal: [], favoris: [], routines: [], routineLog: {}, bibliotheque: [], defis: {} };
   }
 
   function migrate(s) {
     const base = defaultState();
     const out = { version: 1, enfants: Array.isArray(s.enfants) ? s.enfants : base.enfants, journal: Array.isArray(s.journal) ? s.journal : [], favoris: Array.isArray(s.favoris) ? s.favoris : [] };
     out.enfants = out.enfants.map(e => Object.assign(newChild(e.nom || "Enfant", e.emoji || "🐥", e.couleur || COULEURS[2]), e));
+    const obj = v => (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
+    out.routines = Array.isArray(s.routines) ? s.routines : [];
+    out.routineLog = obj(s.routineLog);
+    out.bibliotheque = Array.isArray(s.bibliotheque) ? s.bibliotheque : [];
+    out.defis = obj(s.defis);
     return out;
   }
 
@@ -565,15 +571,316 @@
     </div>`;
   }
 
+  // ───────────────────────── Onglet : Famille ─────────────────────────
+  const FAM_SUBS = { routines: "🌅 Routines", bibliotheque: "📚 Bibliothèque", defis: "🏆 Défis" };
+  const BIB_STATUTS = {
+    livre: { envie: "📌 À lire", fait: "✅ Lu" },
+    comptine: { envie: "📌 À apprendre", fait: "✅ Connue" }
+  };
+  const JOURS = ["L", "M", "M", "J", "V", "S", "D"];
+
+  function renderFamille() {
+    const f = ui.fam;
+    const seg = `<div class="seg big">${Object.entries(FAM_SUBS).map(([v, l]) => `<button class="${f.sub === v ? "on" : ""}" data-action="fam-sub" data-v="${v}">${l}</button>`).join("")}</div>`;
+    const contenu = { routines: renderRoutines, bibliotheque: renderBibliotheque, defis: renderDefis }[f.sub]();
+    return seg + contenu;
+  }
+
+  // ── Routines en images ──
+  function etapeParLabel(label) {
+    const e = window.ETAPES_ROUTINE.find(x => x.label === label) || { emoji: "⭐", label };
+    return { id: uid(), emoji: e.emoji, label: e.label };
+  }
+  function routinesDe(k) { return state.routines.filter(r => r.enfantId === k.id); }
+  function faitesAujourdhui(r) { return state.routineLog[today() + "|" + r.id] || []; }
+  function routineTerminee(r, faites) { return r.etapes.length > 0 && r.etapes.every(e => faites.includes(e.id)); }
+  function nbRoutinesReussies(k) {
+    const ids = routinesDe(k);
+    return Object.entries(state.routineLog).filter(([key, faites]) => {
+      const r = ids.find(x => x.id === key.split("|")[1]);
+      return r && routineTerminee(r, faites);
+    }).length;
+  }
+  function nettoyerLog() {
+    for (const key of Object.keys(state.routineLog)) if (daysAgo(key.split("|")[0]) > 120) delete state.routineLog[key];
+  }
+
+  function renderRoutines() {
+    if (!state.enfants.length) return `<p class="empty">Ajoutez d'abord un enfant dans l'onglet « Enfants ».</p>`;
+    if (!child(ui.fam.childId)) ui.fam.childId = state.enfants[0].id;
+    const k = child(ui.fam.childId);
+    const selecteur = `<div class="seg kids">${state.enfants.map(e => `<button class="${e.id === k.id ? "on" : ""}" data-action="fam-child" data-id="${e.id}">${esc(e.emoji)} ${esc(e.nom)}</button>`).join("")}</div>`;
+    const routines = routinesDe(k);
+    const m = ageMois(k);
+    let html = selecteur;
+    if (!routines.length) {
+      html += `<div class="card"><h3>🌅 Des routines en images pour ${esc(k.nom)}</h3>
+        <p>Une suite d'images montre à l'enfant les étapes du matin ou du coucher. Il coche lui-même chaque étape : c'est plus clair pour lui, et ça évite de répéter les consignes.</p>
+        <button class="btn primary" data-action="routine-defaut" data-id="${k.id}">✨ Créer « Le matin » et « Le coucher »</button>
+        <button class="btn ghost" data-action="routine-new" data-id="${k.id}">➕ Routine vide</button></div>`;
+    } else {
+      const stars = nbRoutinesReussies(k);
+      if (stars) html += `<p class="stars">⭐ ${stars} routine${stars > 1 ? "s" : ""} terminée${stars > 1 ? "s" : ""} par ${esc(k.nom)} ces derniers mois</p>`;
+      html += routines.map(r => {
+        const faites = faitesAujourdhui(r);
+        const n = r.etapes.filter(e => faites.includes(e.id)).length;
+        const pct = r.etapes.length ? Math.round(100 * n / r.etapes.length) : 0;
+        return `<article class="card routine">
+          <div class="routine-head"><span class="big-emoji">${esc(r.emoji)}</span><div><h3>${esc(r.nom)}</h3><span class="muted">Aujourd'hui : ${n}/${r.etapes.length}${routineTerminee(r, faites) ? " 🎉" : ""}</span></div></div>
+          <div class="progress"><span style="width:${pct}%"></span></div>
+          <div class="mini-steps">${r.etapes.map(e => `<span class="${faites.includes(e.id) ? "done" : ""}" title="${esc(e.label)}">${esc(e.emoji)}</span>`).join("")}</div>
+          <div class="row">
+            <button class="btn primary" data-action="routine-play" data-id="${r.id}">▶️ Mode enfant</button>
+            <button class="btn ghost" data-action="routine-edit" data-id="${r.id}">✏️ Modifier</button>
+          </div>
+        </article>`;
+      }).join("");
+      html += `<button class="btn block ghost" data-action="routine-new" data-id="${k.id}">➕ Nouvelle routine (retour d'école, repas…)</button>`;
+    }
+    html += `<div class="card soft"><h3>💡 Conseils</h3><ul class="tips">
+      ${m !== null && m < 24 ? `<li>Avant 2 ans, c'est surtout vous qui montrez les images en nommant chaque étape : la répétition rassure.</li>` : ""}
+      <li>Peu d'étapes au début (3 ou 4), puis on en ajoute.</li>
+      <li>Laisser l'enfant toucher lui-même l'image quand l'étape est faite.</li>
+      <li>Féliciter l'effort (« tu t'es habillé tout seul ! ») plutôt que de récompenser avec des objets.</li>
+    </ul></div>`;
+    return html;
+  }
+
+  function vueModeEnfant(r) {
+    const k = child(r.enfantId);
+    const faites = faitesAujourdhui(r);
+    const fini = routineTerminee(r, faites);
+    return `<div class="kid-mode">
+      <h2>${esc(r.emoji)} ${esc(r.nom)}${k ? ` <span class="muted">· ${esc(k.nom)}</span>` : ""}</h2>
+      <div class="progress big"><span style="width:${r.etapes.length ? Math.round(100 * faites.filter(id => r.etapes.some(e => e.id === id)).length / r.etapes.length) : 0}%"></span></div>
+      ${fini ? `<div class="bravo">🎉<strong>Bravo ${k ? esc(k.nom) : ""} !</strong><span>Tu as tout fait !</span></div>` : ""}
+      <div class="kid-grid">${r.etapes.map((e, i) => `<button class="kid-step ${faites.includes(e.id) ? "done" : ""}" data-action="routine-step" data-r="${r.id}" data-e="${e.id}">
+        <span class="num">${i + 1}</span><span class="e">${esc(e.emoji)}</span><span class="l">${esc(e.label)}</span></button>`).join("")}</div>
+      <div class="form-actions"><button class="btn ghost" data-action="close-modal">Fermer</button></div>
+    </div>`;
+  }
+
+  function vueEditeurRoutine(r) {
+    return `<div class="form">
+      <h2>✏️ Modifier la routine</h2>
+      <label>Nom<input value="${esc(r.nom)}" data-action="routine-rename" data-id="${r.id}"></label>
+      <div class="field"><span>Icône</span><div class="chip-group">${["🌅", "🌙", "🏫", "🍽️", "🛁", "⚽", "🧹", "⭐"].map(em => `<button type="button" class="chip-btn ${r.emoji === em ? "on" : ""}" data-action="routine-icon" data-id="${r.id}" data-v="${em}">${em}</button>`).join("")}</div></div>
+      <h3>Étapes</h3>
+      ${r.etapes.length ? `<ol class="edit-steps">${r.etapes.map((e, i) => `<li><span class="e">${esc(e.emoji)}</span><span class="l">${esc(e.label)}</span>
+        <button type="button" class="btn small ghost" data-action="step-move" data-id="${r.id}" data-i="${i}" data-v="-1" ${i === 0 ? "disabled" : ""} aria-label="Monter">↑</button>
+        <button type="button" class="btn small ghost" data-action="step-move" data-id="${r.id}" data-i="${i}" data-v="1" ${i === r.etapes.length - 1 ? "disabled" : ""} aria-label="Descendre">↓</button>
+        <button type="button" class="btn small ghost danger" data-action="step-del" data-id="${r.id}" data-i="${i}" aria-label="Supprimer">✕</button></li>`).join("")}</ol>` : `<p class="empty">Aucune étape : ajoutez-en ci-dessous.</p>`}
+      <div class="field"><span>Ajouter une étape</span><div class="chip-group">${window.ETAPES_ROUTINE.map(e => `<button type="button" class="chip-btn" data-action="step-add" data-id="${r.id}" data-v="${esc(e.label)}">${e.emoji} ${esc(e.label)}</button>`).join("")}</div></div>
+      <form data-form="step-custom" data-id="${r.id}" class="inline-form">
+        <input name="emoji" maxlength="4" placeholder="🙂" aria-label="Emoji">
+        <input name="label" placeholder="Autre étape…" required aria-label="Nom de l'étape">
+        <button class="btn" type="submit">Ajouter</button>
+      </form>
+      <div class="form-actions">
+        <button type="button" class="btn danger ghost" data-action="routine-del" data-id="${r.id}">Supprimer la routine</button>
+        <button type="button" class="btn primary" data-action="close-modal">Terminé</button>
+      </div>
+    </div>`;
+  }
+
+  // ── Bibliothèque ──
+  function renderBibliotheque() {
+    const f = ui.fam;
+    const type = f.bibType;
+    const statuts = BIB_STATUTS[type];
+    let items = state.bibliotheque.filter(b => b.type === type);
+    const total = items.length;
+    if (f.bibFiltre === "coeur") items = items.filter(b => b.coeur);
+    else if (f.bibFiltre !== "tous") items = items.filter(b => b.statut === f.bibFiltre);
+    items.sort((a, b) => (b.coeur - a.coeur) || (b.derniere || "").localeCompare(a.derniere || "") || a.titre.localeCompare(b.titre, "fr"));
+    const fmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
+
+    let html = `<div class="seg small">
+      <button class="${type === "livre" ? "on" : ""}" data-action="bib-type" data-v="livre">📕 Livres</button>
+      <button class="${type === "comptine" ? "on" : ""}" data-action="bib-type" data-v="comptine">🎵 Comptines & chansons</button>
+    </div>
+    <button class="btn primary block" data-action="bib-new">➕ Ajouter ${type === "livre" ? "un livre" : "une comptine"}</button>`;
+    if (total) {
+      const filtres = { tous: "Tous", coeur: "♥ Préférés", envie: statuts.envie, fait: statuts.fait };
+      html += `<div class="seg">${Object.entries(filtres).map(([v, l]) => `<button class="${f.bibFiltre === v ? "on" : ""}" data-action="bib-filtre" data-v="${v}">${l}</button>`).join("")}</div>`;
+    }
+    if (!items.length) {
+      html += `<p class="empty">${total ? "Rien dans ce filtre." : type === "livre" ? "Notez ici les livres lus, à lire et les grands préférés de chacun." : "Notez les comptines et chansons que vous chantez ensemble."}</p>`;
+    } else {
+      html += `<div class="bib-list">${items.map(b => {
+        const kids = (b.enfants || []).map(child).filter(Boolean);
+        return `<article class="card bib-item">
+          <div class="bib-main" data-action="bib-edit" data-id="${b.id}">
+            <strong>${b.coeur ? '<span class="fav">♥</span> ' : ""}${esc(b.titre)}</strong>
+            ${b.auteur ? `<span class="muted">${esc(b.auteur)}</span>` : ""}
+            <span class="meta">${kids.map(k => avatar(k, "sm")).join("")} ${kids.length ? "&nbsp;&nbsp;" : ""}${statuts[b.statut] || ""}${b.lectures ? ` · ${type === "livre" ? "lu" : "chanté"} ${b.lectures} fois` : ""}${b.derniere ? ` · dernière fois le ${fmt.format(new Date(b.derniere + "T12:00:00"))}` : ""}</span>
+            ${b.note ? `<span class="muted small">${esc(b.note)}</span>` : ""}
+          </div>
+          <div class="bib-actions">
+            <button class="btn small ghost" data-action="bib-plus" data-id="${b.id}" title="${type === "livre" ? "Lu aujourd'hui" : "Chantée aujourd'hui"}">+1 ${type === "livre" ? "📖" : "🎵"}</button>
+            <button class="btn small ghost" data-action="bib-coeur" data-id="${b.id}" aria-label="Préféré">${b.coeur ? "♥" : "♡"}</button>
+          </div>
+        </article>`;
+      }).join("")}</div>`;
+    }
+    if (type === "comptine") {
+      const deja = new Set(state.bibliotheque.filter(b => b.type === "comptine").map(b => b.titre.toLowerCase()));
+      const restantes = window.COMPTINES_CLASSIQUES.filter(t => !deja.has(t.toLowerCase()));
+      if (restantes.length) html += `<div class="card soft"><h3>🎶 Comptines traditionnelles</h3><p class="muted">Touchez pour ajouter à votre liste.</p>
+        <div class="chip-group">${restantes.map(t => `<button class="chip-btn" data-action="bib-classique" data-v="${esc(t)}">+ ${esc(t)}</button>`).join("")}</div></div>`;
+    } else {
+      html += `<div class="card soft"><h3>💡 Idées</h3><ul class="tips">
+        <li>Relire le même livre encore et encore est normal chez les petits : la répétition aide à comprendre et à anticiper.</li>
+        <li>La médiathèque ou bibliothèque municipale permet de varier sans acheter ; les bibliothécaires jeunesse sont de bon conseil.</li>
+        <li>Notez les livres « à lire » quand un ami ou l'école en recommande un.</li></ul></div>`;
+    }
+    return html;
+  }
+
+  function formLivre(b) {
+    const statuts = BIB_STATUTS[b.type];
+    return `<form data-form="book" data-id="${b.id}" class="form">
+      <h2>${state.bibliotheque.some(x => x.id === b.id) ? "Modifier" : "Ajouter"} ${b.type === "livre" ? "un livre" : "une comptine"}</h2>
+      <input type="hidden" name="type" value="${b.type}">
+      <label>Titre<input name="titre" required value="${esc(b.titre)}"></label>
+      <label>${b.type === "livre" ? "Auteur / illustrateur" : "Origine (facultatif)"}<input name="auteur" value="${esc(b.auteur)}"></label>
+      <div class="field"><span>Pour qui</span><div class="chip-group">${state.enfants.map(k => `<label class="chip"><input type="checkbox" name="enfants" value="${k.id}" ${(b.enfants || []).includes(k.id) ? "checked" : ""}><span>${esc(k.emoji + " " + k.nom)}</span></label>`).join("")}</div></div>
+      <div class="field"><span>Statut</span>${chipsChoix("statut", statuts, b.statut)}</div>
+      <label class="check"><input type="checkbox" name="coeur" ${b.coeur ? "checked" : ""}> ♥ Un grand préféré</label>
+      <label>Notes<textarea name="note" rows="3" placeholder="Ex. : passage qu'il adore, âge conseillé, où l'emprunter…">${esc(b.note)}</textarea></label>
+      <div class="form-actions">
+        ${state.bibliotheque.some(x => x.id === b.id) ? `<button type="button" class="btn danger ghost" data-action="bib-del" data-id="${b.id}">Supprimer</button>` : ""}
+        <button type="button" class="btn ghost" data-action="close-modal">Annuler</button>
+        <button type="submit" class="btn primary">Enregistrer</button>
+      </div>
+    </form>`;
+  }
+
+  function saveBookForm(form) {
+    const fd = new FormData(form);
+    let b = state.bibliotheque.find(x => x.id === form.dataset.id);
+    const isNew = !b;
+    if (isNew) b = { id: form.dataset.id, lectures: 0, derniere: "" };
+    b.type = fd.get("type");
+    b.titre = (fd.get("titre") || "").trim();
+    b.auteur = (fd.get("auteur") || "").trim();
+    b.enfants = fd.getAll("enfants");
+    b.statut = fd.get("statut") || "envie";
+    b.coeur = !!fd.get("coeur");
+    b.note = (fd.get("note") || "").trim();
+    if (!b.titre) { toast("Indiquez un titre."); return; }
+    if (isNew) state.bibliotheque.push(b);
+    save(); closeModal(); render();
+  }
+
+  function nouveauLivre(type, titre) {
+    return { id: uid(), type, titre: titre || "", auteur: "", enfants: state.enfants.map(k => k.id), statut: "envie", coeur: false, lectures: 0, derniere: "", note: "" };
+  }
+
+  // ── Défis de la semaine ──
+  function lundiDe(d) {
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+    return x;
+  }
+  function cleSemaine(d) {
+    const l = lundiDe(d || new Date());
+    return l.getFullYear() + "-" + String(l.getMonth() + 1).padStart(2, "0") + "-" + String(l.getDate()).padStart(2, "0");
+  }
+  function jourSemaine() { return (new Date().getDay() + 6) % 7; }
+  function defiDepuisBanque(d) {
+    return { id: d.id, emoji: d.emoji, titre: d.titre, desc: d.desc, type: d.type, cible: d.cible, jours: [], fois: 0 };
+  }
+  function candidatsDefis(exclus) {
+    const ages = state.enfants.map(ageMois).filter(m => m !== null);
+    const aine = ages.length ? Math.max(...ages) : 1000;
+    return window.DEFIS.filter(d => d.ageMin <= aine && !exclus.has(d.id));
+  }
+  function defisSemaine() {
+    const key = cleSemaine();
+    if (!state.defis[key]) {
+      const recents = new Set();
+      Object.keys(state.defis).sort().reverse().slice(0, 2).forEach(k => state.defis[k].forEach(d => recents.add(d.id)));
+      let cand = candidatsDefis(recents);
+      if (cand.length < 3) cand = candidatsDefis(new Set());
+      state.defis[key] = cand.sort((a, b) => hash(a.id, hash(key, 0.7)) - hash(b.id, hash(key, 0.7))).slice(0, 3).map(defiDepuisBanque);
+      save();
+    }
+    return state.defis[key];
+  }
+  function progresDefi(d) { return d.type === "jours" ? d.jours.length : d.fois; }
+  function defiReussi(d) { return progresDefi(d) >= d.cible; }
+
+  function renderDefis() {
+    const key = cleSemaine();
+    const defis = defisSemaine();
+    const lundi = lundiDe(new Date());
+    const fmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
+    const auj = jourSemaine();
+    const totalReussis = Object.values(state.defis).reduce((n, l) => n + l.filter(defiReussi).length, 0);
+
+    let html = `<div class="week-head"><h2>Semaine du ${fmt.format(lundi)}</h2>
+      ${totalReussis ? `<span class="stars">🏆 ${totalReussis} défi${totalReussis > 1 ? "s" : ""} réussi${totalReussis > 1 ? "s" : ""} en famille</span>` : ""}</div>
+      <p class="muted">Trois défis à relever ensemble, renouvelés chaque lundi. Changez ceux qui ne vous parlent pas !</p>`;
+    html += defis.map((d, i) => {
+      const p = progresDefi(d);
+      const ok = defiReussi(d);
+      const suivi = d.type === "jours"
+        ? `<div class="days">${JOURS.map((j, n) => `<button class="day ${d.jours.includes(n) ? "on" : ""} ${n === auj ? "today" : ""}" data-action="defi-jour" data-i="${i}" data-v="${n}" ${n > auj ? "disabled" : ""} aria-label="Jour ${n + 1}">${j}</button>`).join("")}</div>`
+        : `<div class="counter"><button class="btn small ghost" data-action="defi-fois" data-i="${i}" data-v="-1" ${d.fois <= 0 ? "disabled" : ""}>−</button><strong>${d.fois}</strong><button class="btn small" data-action="defi-fois" data-i="${i}" data-v="1">+</button></div>`;
+      return `<article class="card defi ${ok ? "reussi" : ""}">
+        <div class="defi-head"><span class="big-emoji">${esc(d.emoji)}</span><div><h3>${esc(d.titre)}</h3><p class="muted">${esc(d.desc)}</p></div></div>
+        <div class="defi-suivi">${suivi}<span class="defi-score">${ok ? "🏆 Réussi !" : `${p}/${d.cible} ${d.type === "jours" ? "jours" : "fois"}`}</span></div>
+        <div class="progress"><span style="width:${Math.min(100, Math.round(100 * p / d.cible))}%"></span></div>
+        <div class="row end">
+          <button class="btn small ghost" data-action="defi-changer" data-i="${i}">🔄 Changer</button>
+          <button class="btn small ghost" data-action="defi-retirer" data-i="${i}">✕ Retirer</button>
+        </div>
+      </article>`;
+    }).join("");
+    html += `<button class="btn block ghost" data-action="defi-ajouter">➕ Ajouter un défi</button>`;
+
+    const passees = Object.keys(state.defis).filter(k => k < key).sort().reverse().slice(0, 8);
+    if (passees.length) {
+      html += `<h3 class="section-title">📅 Semaines passées</h3><div class="card">${passees.map(k => {
+        const l = state.defis[k];
+        const n = l.filter(defiReussi).length;
+        return `<div class="past-week"><span>Semaine du ${fmt.format(new Date(k + "T12:00:00"))}</span><span>${l.map(d => `<span title="${esc(d.titre)}" class="${defiReussi(d) ? "" : "off"}">${esc(d.emoji)}</span>`).join(" ")}</span><strong>${n}/${l.length}</strong></div>`;
+      }).join("")}</div>`;
+    }
+    return html;
+  }
+
+  function vueAjoutDefi() {
+    const actuels = new Set(defisSemaine().map(d => d.id));
+    const cand = candidatsDefis(actuels);
+    return `<div class="form">
+      <h2>➕ Ajouter un défi</h2>
+      <div class="defi-bank">${cand.map(d => `<button class="act-card" data-action="defi-pick" data-v="${d.id}"><span class="act-emoji">${d.emoji}</span><span class="act-body"><strong>${esc(d.titre)}</strong><span class="muted">${esc(d.desc)}</span></span></button>`).join("")}</div>
+      <h3 class="section-title">Ou inventez le vôtre</h3>
+      <form data-form="defi-custom">
+        <label>Emoji<input name="emoji" maxlength="4" placeholder="⭐"></label>
+        <label>Défi<input name="titre" required placeholder="Ex. : aller voir les canards"></label>
+        <label>Détails<input name="desc"></label>
+        <div class="field"><span>Suivi</span>${chipsChoix("type", { jours: "Chaque jour", fois: "Un nombre de fois" }, "fois")}</div>
+        <label>Objectif (jours ou fois)<input type="number" name="cible" min="1" max="7" value="1"></label>
+        <div class="form-actions"><button type="button" class="btn ghost" data-action="close-modal">Annuler</button><button class="btn primary" type="submit">Ajouter</button></div>
+      </form>
+    </div>`;
+  }
+
   // ───────────────────────── Réglages / sauvegarde ─────────────────────────
   function renderReglages() {
     return `<div class="form">
       <h2>⚙️ Sauvegarde & confidentialité</h2>
       <p>Toutes les données (profils, journal) sont enregistrées <strong>uniquement dans ce navigateur, sur cet appareil</strong>. Rien n'est envoyé sur internet.</p>
-      <p class="hint">Si vous videz les données du navigateur, elles seront perdues : pensez à exporter une sauvegarde de temps en temps. Pour partager entre deux téléphones, exportez sur l'un et importez sur l'autre.</p>
+      <p class="hint">Si vous videz les données du navigateur, elles seront perdues : pensez à exporter une sauvegarde de temps en temps.</p>
+      <h3>📲 Passer les données sur l'autre téléphone</h3>
+      <ol class="etapes"><li>Sur ce téléphone : « Envoyer » (par Messages, WhatsApp, AirDrop, e-mail…).</li><li>Sur l'autre téléphone : enregistrer le fichier reçu, puis « Importer ».</li></ol>
       <div class="form-actions stack">
-        <button class="btn primary" data-action="export">⬇️ Exporter une sauvegarde</button>
-        <label class="btn ghost">⬆️ Importer une sauvegarde<input type="file" accept="application/json,.json" data-action="import" hidden></label>
+        <button class="btn primary" data-action="share">📤 Envoyer la sauvegarde</button>
+        <button class="btn ghost" data-action="export">⬇️ Télécharger la sauvegarde</button>
+        <label class="btn ghost">⬆️ Importer une sauvegarde<input type="file" accept="application/json,.json,text/plain" data-action="import" hidden></label>
         <button class="btn danger ghost" data-action="reset">🗑️ Tout effacer</button>
         <button class="btn ghost" data-action="close-modal">Fermer</button>
       </div>
@@ -590,6 +897,18 @@
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function partager() {
+    const nom = "education-enfants-" + today() + ".json";
+    const fichier = new File([JSON.stringify(state)], nom, { type: "application/json" });
+    if (navigator.canShare && navigator.canShare({ files: [fichier] })) {
+      try { await navigator.share({ files: [fichier], title: "Sauvegarde Grandir ensemble" }); }
+      catch (e) { /* partage annulé */ }
+    } else {
+      exporter();
+      toast("Partage direct indisponible : fichier téléchargé.");
+    }
   }
 
   function importer(file) {
@@ -610,8 +929,9 @@
   }
 
   // ───────────────────────── Modale ─────────────────────────
-  function openModal(html) {
+  function openModal(html, classe) {
     const dlg = $("#modal");
+    dlg.className = classe || "";
     $("#modal-body").innerHTML = html;
     if (!dlg.open) dlg.showModal();
     dlg.scrollTop = 0;
@@ -620,13 +940,22 @@
   function closeModal() { const dlg = $("#modal"); if (dlg.open) dlg.close(); }
 
   // ───────────────────────── Rendu principal ─────────────────────────
-  const TITRES = { enfants: "Nos enfants", developpement: "Développement", activite: "Activité du moment", journal: "Journal" };
+  const TITRES = { enfants: "Nos enfants", developpement: "Développement", activite: "Activité du moment", famille: "Famille", journal: "Journal" };
 
   function render() {
     $("#page-title").textContent = TITRES[ui.tab];
     const view = $("#view");
-    view.innerHTML = { enfants: renderEnfants, developpement: renderDeveloppement, activite: renderActivite, journal: renderJournal }[ui.tab]();
+    view.innerHTML = { enfants: renderEnfants, developpement: renderDeveloppement, activite: renderActivite, famille: renderFamille, journal: renderJournal }[ui.tab]();
     document.querySelectorAll(".tabbar button").forEach(b => b.classList.toggle("on", b.dataset.tab === ui.tab));
+  }
+
+  function routine(id) { return state.routines.find(r => r.id === id); }
+  function majEditeur(r) {
+    save();
+    const scroll = $("#modal-body").scrollTop;
+    openModal(vueEditeurRoutine(r));
+    $("#modal-body").scrollTop = scroll;
+    render();
   }
 
   // ───────────────────────── Événements ─────────────────────────
@@ -692,6 +1021,88 @@
       save(); closeModal(); render();
     },
     "export": () => exporter(),
+    "share": () => partager(),
+
+    // Famille
+    "fam-sub": el => { ui.fam.sub = el.dataset.v; render(); },
+    "fam-child": el => { ui.fam.childId = el.dataset.id; render(); },
+    "routine-defaut": el => {
+      window.MODELES_ROUTINES.forEach(m => state.routines.push({ id: uid(), enfantId: el.dataset.id, nom: m.nom, emoji: m.emoji, etapes: m.etapes.map(etapeParLabel) }));
+      save(); render(); toast("Routines créées : modifiez-les à votre goût ✏️");
+    },
+    "routine-new": el => {
+      const r = { id: uid(), enfantId: el.dataset.id, nom: "Nouvelle routine", emoji: "⭐", etapes: [] };
+      state.routines.push(r); save(); render(); openModal(vueEditeurRoutine(r));
+    },
+    "routine-play": el => { nettoyerLog(); openModal(vueModeEnfant(routine(el.dataset.id)), "kid"); },
+    "routine-edit": el => openModal(vueEditeurRoutine(routine(el.dataset.id))),
+    "routine-step": el => {
+      const r = routine(el.dataset.r);
+      const key = today() + "|" + r.id;
+      const faites = state.routineLog[key] || [];
+      const avant = routineTerminee(r, faites);
+      state.routineLog[key] = faites.includes(el.dataset.e) ? faites.filter(id => id !== el.dataset.e) : faites.concat(el.dataset.e);
+      save();
+      const scroll = $("#modal-body").scrollTop;
+      openModal(vueModeEnfant(r), "kid");
+      $("#modal-body").scrollTop = routineTerminee(r, state.routineLog[key]) && !avant ? 0 : scroll;
+      render();
+    },
+    "routine-icon": el => { const r = routine(el.dataset.id); r.emoji = el.dataset.v; save(); openModal(vueEditeurRoutine(r)); render(); },
+    "step-add": el => { const r = routine(el.dataset.id); r.etapes.push(etapeParLabel(el.dataset.v)); majEditeur(r); },
+    "step-del": el => { const r = routine(el.dataset.id); r.etapes.splice(+el.dataset.i, 1); majEditeur(r); },
+    "step-move": el => {
+      const r = routine(el.dataset.id), i = +el.dataset.i, j = i + +el.dataset.v;
+      [r.etapes[i], r.etapes[j]] = [r.etapes[j], r.etapes[i]];
+      majEditeur(r);
+    },
+    "routine-del": el => {
+      const r = routine(el.dataset.id);
+      if (!confirm("Supprimer la routine « " + r.nom + " » ?")) return;
+      state.routines = state.routines.filter(x => x.id !== r.id);
+      save(); closeModal(); render();
+    },
+    "bib-type": el => { ui.fam.bibType = el.dataset.v; ui.fam.bibFiltre = "tous"; render(); },
+    "bib-filtre": el => { ui.fam.bibFiltre = el.dataset.v; render(); },
+    "bib-new": () => openModal(formLivre(nouveauLivre(ui.fam.bibType))),
+    "bib-edit": el => openModal(formLivre(state.bibliotheque.find(b => b.id === el.dataset.id))),
+    "bib-plus": el => {
+      const b = state.bibliotheque.find(x => x.id === el.dataset.id);
+      b.lectures = (b.lectures || 0) + 1; b.derniere = today(); b.statut = "fait";
+      save(); render(); toast((b.type === "livre" ? "📖 Lecture" : "🎵 Chanson") + " notée : " + b.lectures + " fois");
+    },
+    "bib-coeur": el => { const b = state.bibliotheque.find(x => x.id === el.dataset.id); b.coeur = !b.coeur; save(); render(); },
+    "bib-classique": el => { state.bibliotheque.push(nouveauLivre("comptine", el.dataset.v)); save(); render(); },
+    "bib-del": el => {
+      if (!confirm("Supprimer de la bibliothèque ?")) return;
+      state.bibliotheque = state.bibliotheque.filter(b => b.id !== el.dataset.id);
+      save(); closeModal(); render();
+    },
+    "defi-jour": el => {
+      const d = defisSemaine()[+el.dataset.i], n = +el.dataset.v;
+      d.jours = d.jours.includes(n) ? d.jours.filter(x => x !== n) : d.jours.concat(n);
+      const bravo = !defiReussi({ ...d, jours: d.jours.filter(x => x !== n) }) && defiReussi(d);
+      save(); render(); if (bravo) toast("🏆 Défi « " + d.titre + " » réussi, bravo la famille !");
+    },
+    "defi-fois": el => {
+      const d = defisSemaine()[+el.dataset.i];
+      const avant = defiReussi(d);
+      d.fois = Math.max(0, d.fois + +el.dataset.v);
+      save(); render(); if (!avant && defiReussi(d)) toast("🏆 Défi « " + d.titre + " » réussi, bravo la famille !");
+    },
+    "defi-changer": el => {
+      const liste = defisSemaine(), i = +el.dataset.i;
+      const cand = candidatsDefis(new Set(liste.map(d => d.id)));
+      if (!cand.length) { toast("Plus d'autre défi disponible."); return; }
+      liste[i] = defiDepuisBanque(cand[Math.floor(Math.random() * cand.length)]);
+      save(); render();
+    },
+    "defi-retirer": el => { defisSemaine().splice(+el.dataset.i, 1); save(); render(); },
+    "defi-ajouter": () => openModal(vueAjoutDefi()),
+    "defi-pick": el => {
+      defisSemaine().push(defiDepuisBanque(window.DEFIS.find(d => d.id === el.dataset.v)));
+      save(); closeModal(); render();
+    },
     "reset": () => {
       if (!confirm("Effacer TOUTES les données (profils et journal) ? Cette action est définitive.")) return;
       state = defaultState(); save(); closeModal(); actions["wiz-reset"](); toast("Données effacées.");
@@ -710,12 +1121,30 @@
     const el = e.target;
     if (el.dataset.action === "toggle-acquis") actions["toggle-acquis"](el);
     if (el.dataset.action === "import" && el.files[0]) importer(el.files[0]);
+    if (el.dataset.action === "routine-rename") { const r = routine(el.dataset.id); r.nom = el.value.trim() || r.nom; save(); render(); }
   });
 
   document.addEventListener("submit", e => {
     const f = e.target;
     if (f.dataset.form === "child") { e.preventDefault(); saveChildForm(f); }
     if (f.dataset.form === "entry") { e.preventDefault(); saveEntryForm(f); }
+    if (f.dataset.form === "book") { e.preventDefault(); saveBookForm(f); }
+    if (f.dataset.form === "step-custom") {
+      e.preventDefault();
+      const fd = new FormData(f), r = routine(f.dataset.id);
+      const label = (fd.get("label") || "").trim();
+      if (!label) return;
+      r.etapes.push({ id: uid(), emoji: (fd.get("emoji") || "").trim() || "⭐", label });
+      majEditeur(r);
+    }
+    if (f.dataset.form === "defi-custom") {
+      e.preventDefault();
+      const fd = new FormData(f);
+      const type = fd.get("type") || "fois";
+      const cible = Math.min(type === "jours" ? 7 : 50, Math.max(1, parseInt(fd.get("cible"), 10) || 1));
+      defisSemaine().push({ id: "perso-" + uid(), emoji: (fd.get("emoji") || "").trim() || "⭐", titre: (fd.get("titre") || "").trim(), desc: (fd.get("desc") || "").trim(), type, cible, jours: [], fois: 0 });
+      save(); closeModal(); render();
+    }
   });
 
   // Fermer la modale en touchant le fond
