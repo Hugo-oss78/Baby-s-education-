@@ -13,7 +13,7 @@
       <stop offset="0" stop-color="#c8913a"/><stop offset="1" stop-color="#8f5a1f"/>
     </linearGradient>
     <linearGradient id="pelage" x1="0" y1="-1" x2="0" y2="1">
-      <stop offset="0" stop-color="#8b5a38"/><stop offset="1" stop-color="#5e3a22"/>
+      <stop offset="0" stop-color="#9c6a47"/><stop offset="1" stop-color="#6e452c"/>
     </linearGradient>
     <clipPath id="cadre"><rect width="512" height="512" rx="112"/></clipPath>
   </defs>
@@ -51,30 +51,48 @@
     <g fill="#b88a45"><circle cx="-12" cy="16" r="1.3"/><circle cx="-15" cy="21" r="1.3"/><circle cx="12" cy="16" r="1.3"/><circle cx="15" cy="21" r="1.3"/></g>
   </g></g>
     <!-- Loulou, la loutre -->
-    <g transform="translate(362 330) scale(1.38)"><g>
-    <!-- cou / épaules -->
-    <path fill="#654029" d="M-50 6 C-58 50 -66 100 -92 170 L92 170 C66 100 58 50 50 6 Z"/><path fill="#cfae86" d="M-26 44 C-30 70 -30 110 -24 170 L24 170 C30 110 30 70 26 44 Z" opacity=".9"/>
-    <!-- oreilles -->
-    <ellipse cx="-44" cy="-30" rx="10" ry="9" fill="#6b432a"/><ellipse cx="44" cy="-30" rx="10" ry="9" fill="#6b432a"/>
-    <ellipse cx="-44" cy="-30" rx="5" ry="4.5" fill="#3f2616"/><ellipse cx="44" cy="-30" rx="5" ry="4.5" fill="#3f2616"/>
-    <!-- tête -->
-    <path fill="url(#pelage)" d="M0-52 C34-52 54-30 54-4 C54 26 32 48 0 48 C-32 48 -54 26 -54-4 C-54-30 -34-52 0-52 Z"/>
-    <!-- masque clair du museau et des joues -->
-    <path fill="#d9b88f" d="M0 0 C18-4 40 2 42 18 C44 34 24 44 0 44 C-24 44 -44 34 -42 18 C-40 2 -18-4 0 0 Z"/>
-    <!-- yeux -->
-    <circle cx="-21" cy="-12" r="6" fill="#140d08"/><circle cx="21" cy="-12" r="6" fill="#140d08"/>
-    <circle cx="-19" cy="-14" r="1.8" fill="#f3e6cf"/><circle cx="23" cy="-14" r="1.8" fill="#f3e6cf"/>
-    <!-- truffe -->
-    <path fill="#24160d" d="M-12 6 C-12 2 12 2 12 6 C12 12 5 16 0 16 C-5 16 -12 12 -12 6 Z"/>
-    <path d="M-5 5 Q0 3 5 5" stroke="#6b4a36" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    <!-- bouche -->
-    <path d="M0 16 V22 M0 22 Q-6 28 -12 25 M0 22 Q6 28 12 25" stroke="#3a2415" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <!-- moustaches -->
-    <g stroke="#f6ecdc" stroke-width="1.4" stroke-linecap="round" opacity=".85" fill="none">
-      <path d="M-18 18 Q-40 12 -62 14"/><path d="M-18 22 Q-40 22 -60 28"/><path d="M-18 26 Q-36 32 -54 42"/>
-      <path d="M18 18 Q40 12 62 14"/><path d="M18 22 Q40 22 60 28"/><path d="M18 26 Q36 32 54 42"/>
+    <g transform="translate(360 324) scale(1.42)"><g>
+    <!-- cou élancé et plastron -->
+    <path fill="#74492f" d="M-34 10 C-38 50 -50 100 -76 170 L76 170 C50 100 38 50 34 10 Z"/>
+    <path fill="#e6c9a2" d="M-17 44 C-21 80 -21 120 -15 170 L15 170 C21 120 21 80 17 44 Z"/>
+    <!-- collier de perles -->
+    <g fill="#f7f1e6" stroke="#d9c7a8" stroke-width=".8">
+      <circle cx="-30" cy="52" r="3.4"/><circle cx="-23" cy="57" r="3.4"/><circle cx="-15.5" cy="60.5" r="3.4"/><circle cx="-7.8" cy="62.5" r="3.4"/>
+      <circle cx="0" cy="63.2" r="3.8"/><circle cx="7.8" cy="62.5" r="3.4"/><circle cx="15.5" cy="60.5" r="3.4"/><circle cx="23" cy="57" r="3.4"/><circle cx="30" cy="52" r="3.4"/>
     </g>
-    <g fill="#8a6848"><circle cx="-14" cy="19" r="1.3"/><circle cx="-18" cy="24" r="1.3"/><circle cx="14" cy="19" r="1.3"/><circle cx="18" cy="24" r="1.3"/></g>
+    <!-- oreilles -->
+    <ellipse cx="-37" cy="-36" rx="8" ry="7" fill="#6e452c"/><ellipse cx="37" cy="-36" rx="8" ry="7" fill="#6e452c"/>
+    <ellipse cx="-37" cy="-36" rx="4" ry="3.5" fill="#3f2616"/><ellipse cx="37" cy="-36" rx="4" ry="3.5" fill="#3f2616"/>
+    <!-- tête ovale -->
+    <path fill="url(#pelage)" d="M0-56 C27-56 44-34 44-8 C44 20 27 44 0 46 C-27 44 -44 20 -44-8 C-44-34 -27-56 0-56 Z"/>
+    <!-- masque clair -->
+    <path fill="#eed7b8" d="M0 0 C15-4 32 3 34 17 C35 31 19 42 0 42 C-19 42 -35 31 -34 17 C-32 3 -15-4 0 0 Z"/>
+    <!-- joues discrètes -->
+    <ellipse cx="-25" cy="20" rx="7" ry="4.5" fill="#e48fa8" opacity=".35"/><ellipse cx="25" cy="20" rx="7" ry="4.5" fill="#e48fa8" opacity=".35"/>
+    <!-- sourcils fins -->
+    <path d="M-27-24 Q-19-28 -11-25 M27-24 Q19-28 11-25" stroke="#4a2c1b" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".7"/>
+    <!-- yeux en amande avec cils -->
+    <path fill="#140d08" d="M-27-12 Q-19-20 -10-13 Q-19-7 -27-12 Z"/>
+    <path fill="#140d08" d="M27-12 Q19-20 10-13 Q19-7 27-12 Z"/>
+    <circle cx="-16.5" cy="-14" r="1.5" fill="#f3e6cf"/><circle cx="16.5" cy="-14" r="1.5" fill="#f3e6cf"/>
+    <path d="M-26.5-12.5 q-3.5-.5 -5.5-3.5 M-24-15.5 q-2.5-1.5 -3-4.5 M26.5-12.5 q3.5-.5 5.5-3.5 M24-15.5 q2.5-1.5 3-4.5" stroke="#140d08" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+    <!-- petite truffe -->
+    <path fill="#3a2218" d="M-7 7 C-7 3.5 7 3.5 7 7 C7 11 3 13.5 0 13.5 C-3 13.5 -7 11 -7 7 Z"/>
+    <!-- sourire -->
+    <path d="M0 13.5 V18 M0 18 Q-5 23 -10 21 M0 18 Q5 23 10 21" stroke="#4a2c1b" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <!-- moustaches fines -->
+    <g stroke="#fbf5ec" stroke-width="1" stroke-linecap="round" opacity=".8" fill="none">
+      <path d="M-15 16 Q-34 12 -52 14"/><path d="M-15 20 Q-34 22 -50 28"/>
+      <path d="M15 16 Q34 12 52 14"/><path d="M15 20 Q34 22 50 28"/>
+    </g>
+    <!-- fleur à l'oreille -->
+    <g transform="translate(-40 -46) rotate(-15)">
+      <path d="M4 6 Q14 10 20 4 Q12 0 4 6 Z" fill="#8fa876"/>
+      <g fill="#f4c6d3" stroke="#e3a3b7" stroke-width=".6">
+        <circle cx="0" cy="-6" r="5"/><circle cx="5.7" cy="-1.9" r="5"/><circle cx="3.5" cy="4.9" r="5"/><circle cx="-3.5" cy="4.9" r="5"/><circle cx="-5.7" cy="-1.9" r="5"/>
+      </g>
+      <circle r="3" fill="#d8b36a"/>
+    </g>
   </g></g>
   </g>
 </svg>
