@@ -41,8 +41,10 @@
   const TEMPERAMENTS = { calme: "Plutôt calme", equilibre: "Entre les deux", energique: "Très énergique" };
   const SOCIABILITE = { reserve: "Plutôt réservé(e)", variable: "Ça dépend", sociable: "Très sociable" };
   const RESSENTIS = { "😍": "Adoré", "🙂": "Bien", "😐": "Mitigé", "😣": "Difficile" };
-  const AVATARS = ["🦁", "🐻", "🐰", "🦊", "🐼", "🐯", "🐨", "🐸", "🦄", "🐳", "🐥", "🐶", "🐱", "🦋"];
-  const COULEURS = ["#f59e0b", "#8b5cf6", "#10b981", "#ef4444", "#3b82f6", "#ec4899"];
+  /* Emblèmes dessinés (img/*.svg), utilisables comme avatar à la place d'un emoji. */
+  const EMBLEMES = { lion: { label: "Lion", src: "img/lion.svg" }, loutre: { label: "Loutre", src: "img/loutre.svg" } };
+  const AVATARS = ["lion", "loutre", "🦁", "🐻", "🐰", "🦊", "🐼", "🐯", "🐨", "🐸", "🦄", "🐳", "🐥", "🐶", "🐱", "🦋"];
+  const COULEURS = ["#c9a45c", "#8b5a38", "#f59e0b", "#8b5cf6", "#10b981", "#ef4444", "#3b82f6", "#ec4899"];
 
   const SUBS = {
     motricite: { interieur: "🏠 Intérieur", exterieur: "🌳 Extérieur", aquatique: "💧 Dans l'eau" },
@@ -72,13 +74,18 @@
   }
 
   function defaultState() {
-    return { version: 1, enfants: [newChild("Titi", "🦁", COULEURS[0]), newChild("Loulou", "🐻", COULEURS[1])], journal: [], favoris: [], routines: [], routineLog: {}, bibliotheque: [], defis: {} };
+    return { version: 1, enfants: [newChild("Titi", "lion", "#c9a45c"), newChild("Loulou", "loutre", "#8b5a38")], journal: [], favoris: [], routines: [], routineLog: {}, bibliotheque: [], defis: {} };
   }
 
   function migrate(s) {
     const base = defaultState();
     const out = { version: 1, enfants: Array.isArray(s.enfants) ? s.enfants : base.enfants, journal: Array.isArray(s.journal) ? s.journal : [], favoris: Array.isArray(s.favoris) ? s.favoris : [] };
     out.enfants = out.enfants.map(e => Object.assign(newChild(e.nom || "Enfant", e.emoji || "🐥", e.couleur || COULEURS[2]), e));
+    // Anciens avatars emoji de Titi et Loulou → nouveaux emblèmes dessinés
+    out.enfants.forEach(e => {
+      if (e.emoji === "🦁") { e.emoji = "lion"; if (e.couleur === "#f59e0b") e.couleur = "#c9a45c"; }
+      if (e.nom === "Loulou" && e.emoji === "🐻") { e.emoji = "loutre"; if (e.couleur === "#8b5cf6") e.couleur = "#8b5a38"; }
+    });
     const obj = v => (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
     out.routines = Array.isArray(s.routines) ? s.routines : [];
     out.routineLog = obj(s.routineLog);
@@ -208,9 +215,16 @@
   }
 
   // ───────────────────────── Composants ─────────────────────────
-  function avatar(k, size) {
-    return `<span class="avatar ${size || ""}" style="--c:${esc(k.couleur)}">${esc(k.emoji)}</span>`;
+  /* Emblème de l'enfant : image dessinée ou emoji. */
+  function embleme(k) {
+    const em = EMBLEMES[k.emoji];
+    return em ? `<img class="emb" src="${em.src}" alt="${esc(em.label)}">` : esc(k.emoji);
   }
+  function avatar(k, size) {
+    return `<span class="avatar ${EMBLEMES[k.emoji] ? "img" : ""} ${size || ""}" style="--c:${esc(k.couleur)}">${embleme(k)}</span>`;
+  }
+  /* Emblème + prénom, pour les boutons et puces. */
+  function nomAvecEmbleme(k) { return `<span class="inline-emb">${embleme(k)}</span> ${esc(k.nom)}`; }
 
   function carteActivite(r, kids) {
     const a = r.a;
@@ -300,7 +314,7 @@
       <fieldset><legend>L'essentiel</legend>
         <label>Prénom ou surnom<input name="nom" required value="${esc(k.nom)}"></label>
         <label>Date de naissance<input type="date" name="naissance" value="${esc(k.naissance)}" max="${today()}"></label>
-        <div class="field"><span>Avatar</span>${chipsChoix("emoji", Object.fromEntries(AVATARS.map(a => [a, a])), k.emoji)}</div>
+        <div class="field"><span>Emblème</span><div class="chip-group">${AVATARS.map(a => `<label class="chip avatar-choice"><input type="radio" name="emoji" value="${a}" ${k.emoji === a ? "checked" : ""}><span>${EMBLEMES[a] ? `<img class="emb" src="${EMBLEMES[a].src}" alt="${EMBLEMES[a].label}">` : a}</span></label>`).join("")}</div></div>
         <div class="field"><span>Couleur</span><div class="chip-group">${COULEURS.map(c => `<label class="chip color"><input type="radio" name="couleur" value="${c}" ${k.couleur === c ? "checked" : ""}><span style="background:${c}"></span></label>`).join("")}</div></div>
       </fieldset>
       <fieldset><legend>Sa personnalité</legend>
@@ -364,7 +378,7 @@
     const idx = trancheIdx < 0 ? -1 : Math.min(Math.max(trancheIdx + d.offset, 0), window.TRANCHES.length - 1);
     const t = idx < 0 ? null : window.TRANCHES[idx];
 
-    const selecteur = `<div class="seg kids">${state.enfants.map(e => `<button class="${e.id === k.id ? "on" : ""}" data-action="dev-child" data-id="${e.id}">${esc(e.emoji)} ${esc(e.nom)}</button>`).join("")}</div>`;
+    const selecteur = `<div class="seg kids">${state.enfants.map(e => `<button class="${e.id === k.id ? "on" : ""}" data-action="dev-child" data-id="${e.id}">${nomAvecEmbleme(e)}</button>`).join("")}</div>`;
     const sections = `<div class="seg big">
       <button class="${d.section === "motricite" ? "on" : ""}" data-action="dev-section" data-v="motricite">🤸 Motricité</button>
       <button class="${d.section === "mental" ? "on" : ""}" data-action="dev-section" data-v="mental">🧠 Mental</button>
@@ -422,7 +436,7 @@
     const w = ui.wiz;
     const kids = kidsFor(w.who);
     const fil = [];
-    if (w.who) fil.push(`<button class="crumb" data-action="wiz-goto" data-v="1">${w.who === "tous" ? "👨‍👩‍👧‍👦 " + esc(nomsKids(kids)) : esc(kids[0].emoji + " " + kids[0].nom)}</button>`);
+    if (w.who) fil.push(`<button class="crumb" data-action="wiz-goto" data-v="1">${w.who === "tous" ? "👨‍👩‍👧‍👦 " + esc(nomsKids(kids)) : nomAvecEmbleme(kids[0])}</button>`);
     if (w.moment) fil.push(`<button class="crumb" data-action="wiz-goto" data-v="2">${MOMENTS[w.moment].emoji} ${MOMENTS[w.moment].label}</button>`);
     if (w.lieu) fil.push(`<button class="crumb" data-action="wiz-goto" data-v="3">${w.lieu === "tous" ? "✨ Peu importe" : LIEUX[w.lieu].emoji + " " + LIEUX[w.lieu].label}</button>`);
     const filHtml = fil.length ? `<div class="crumbs">${fil.join("<span>›</span>")}</div>` : "";
@@ -509,7 +523,7 @@
     return `<form data-form="entry" data-id="${j.id}" class="form">
       <h2>${act ? act.emoji + " " + esc(act.titre) : "Noter un moment"}</h2>
       <label>Date<input type="date" name="date" value="${esc(j.date)}" max="${today()}" required></label>
-      <div class="field"><span>Avec</span><div class="chip-group">${state.enfants.map(k => `<label class="chip"><input type="checkbox" name="enfants" value="${k.id}" ${j.enfants.includes(k.id) ? "checked" : ""}><span>${esc(k.emoji + " " + k.nom)}</span></label>`).join("")}</div></div>
+      <div class="field"><span>Avec</span><div class="chip-group">${state.enfants.map(k => `<label class="chip"><input type="checkbox" name="enfants" value="${k.id}" ${j.enfants.includes(k.id) ? "checked" : ""}><span>${nomAvecEmbleme(k)}</span></label>`).join("")}</div></div>
       <label>Activité liée (facultatif)<select name="activiteId"><option value="">— Aucune —</option>${ACTIVITES.slice().sort((a, b) => a.titre.localeCompare(b.titre, "fr")).map(a => `<option value="${a.id}" ${a.id === j.activiteId ? "selected" : ""}>${a.emoji} ${esc(a.titre)}</option>`).join("")}</select></label>
       <label>Titre (facultatif)<input name="titre" value="${esc(j.titre)}" placeholder="Ex. : premier plongeon !"></label>
       <div class="field"><span>Comment ça s'est passé ?</span>${chipsChoix("ressenti", Object.fromEntries(Object.entries(RESSENTIS).map(([e, l]) => [e, e + " " + l])), j.ressenti)}</div>
@@ -609,7 +623,7 @@
     if (!state.enfants.length) return `<p class="empty">Ajoutez d'abord un enfant dans l'onglet « Enfants ».</p>`;
     if (!child(ui.fam.childId)) ui.fam.childId = state.enfants[0].id;
     const k = child(ui.fam.childId);
-    const selecteur = `<div class="seg kids">${state.enfants.map(e => `<button class="${e.id === k.id ? "on" : ""}" data-action="fam-child" data-id="${e.id}">${esc(e.emoji)} ${esc(e.nom)}</button>`).join("")}</div>`;
+    const selecteur = `<div class="seg kids">${state.enfants.map(e => `<button class="${e.id === k.id ? "on" : ""}" data-action="fam-child" data-id="${e.id}">${nomAvecEmbleme(e)}</button>`).join("")}</div>`;
     const routines = routinesDe(k);
     const m = ageMois(k);
     let html = selecteur;
@@ -744,7 +758,7 @@
       <input type="hidden" name="type" value="${b.type}">
       <label>Titre<input name="titre" required value="${esc(b.titre)}"></label>
       <label>${b.type === "livre" ? "Auteur / illustrateur" : "Origine (facultatif)"}<input name="auteur" value="${esc(b.auteur)}"></label>
-      <div class="field"><span>Pour qui</span><div class="chip-group">${state.enfants.map(k => `<label class="chip"><input type="checkbox" name="enfants" value="${k.id}" ${(b.enfants || []).includes(k.id) ? "checked" : ""}><span>${esc(k.emoji + " " + k.nom)}</span></label>`).join("")}</div></div>
+      <div class="field"><span>Pour qui</span><div class="chip-group">${state.enfants.map(k => `<label class="chip"><input type="checkbox" name="enfants" value="${k.id}" ${(b.enfants || []).includes(k.id) ? "checked" : ""}><span>${nomAvecEmbleme(k)}</span></label>`).join("")}</div></div>
       <div class="field"><span>Statut</span>${chipsChoix("statut", statuts, b.statut)}</div>
       <label class="check"><input type="checkbox" name="coeur" ${b.coeur ? "checked" : ""}> ♥ Un grand préféré</label>
       <label>Notes<textarea name="note" rows="3" placeholder="Ex. : passage qu'il adore, âge conseillé, où l'emprunter…">${esc(b.note)}</textarea></label>

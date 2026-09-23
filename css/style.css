@@ -320,3 +320,12 @@ dialog.kid #modal-body { max-height: 100vh; height: 100%; }
 .past-week > span:first-child { flex: 1; }
 .past-week .off { opacity: .3; }
 .defi-bank { display: grid; gap: 8px; }
+
+/* ─── Emblèmes dessinés ─── */
+.emb { display: block; width: 100%; height: 100%; }
+.avatar.img { padding: 0; overflow: hidden; background: #132822; border-width: 2px; }
+.inline-emb { display: inline-block; width: 1.4em; height: 1.4em; vertical-align: -.35em; }
+.inline-emb .emb { border-radius: 50%; }
+.avatar-choice span { display: grid; place-items: center; min-width: 40px; height: 40px; padding: 0 8px !important; font-size: 1.3rem; }
+.avatar-choice .emb { width: 34px; height: 34px; border-radius: 50%; }
+.avatar-choice img + * { display: none; }
