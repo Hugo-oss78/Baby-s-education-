@@ -94,6 +94,7 @@
     out.routineLog = obj(s.routineLog);
     out.bibliotheque = Array.isArray(s.bibliotheque) ? s.bibliotheque : [];
     out.defis = obj(s.defis);
+    out.derniereSauvegarde = s.derniereSauvegarde || "";
     return out;
   }
 
@@ -290,9 +291,25 @@
         </div>
       </article>`;
     }).join("");
-    return `<p class="intro">Les informations saisies restent <strong>uniquement sur cet appareil</strong>. Plus le profil est complet, plus les propositions sont personnalisées.</p>
+    return `${bandeauSauvegarde()}<p class="intro">Les informations saisies restent <strong>uniquement sur cet appareil</strong>. Plus le profil est complet, plus les propositions sont personnalisées.</p>
       ${cards}
       <button class="btn block ghost" data-action="add-child">➕ Ajouter un enfant</button>`;
+  }
+
+  /* Rappel de sauvegarde : les données n'existent que sur ce téléphone. */
+  function aDesDonnees() {
+    return state.journal.length || state.bibliotheque.length || state.routines.length ||
+      state.enfants.some(k => k.naissance || k.forces || k.notes || (k.interets || []).length);
+  }
+  function bandeauSauvegarde() {
+    if (!aDesDonnees()) return "";
+    const jours = state.derniereSauvegarde ? daysAgo(state.derniereSauvegarde) : null;
+    if (jours !== null && jours < 7) return "";
+    return `<div class="backup-banner">
+      <div><strong>💾 ${jours === null ? "Aucune sauvegarde pour l'instant" : "Dernière sauvegarde il y a " + jours + " jours"}</strong>
+      <span>Vos informations n'existent que sur ce téléphone. Envoyez-vous une copie (e-mail, Notes, WhatsApp…) pour ne rien perdre.</span></div>
+      <button class="btn primary small" data-action="share">Sauvegarder</button>
+    </div>`;
   }
 
   function conseilDomaine(d) {
@@ -891,7 +908,8 @@
     return `<div class="form">
       <h2>⚙️ Sauvegarde & confidentialité</h2>
       <p>Toutes les données (profils, journal) sont enregistrées <strong>uniquement dans ce navigateur, sur cet appareil</strong>. Rien n'est envoyé sur internet.</p>
-      <p class="hint">Si vous videz les données du navigateur, elles seront perdues : pensez à exporter une sauvegarde de temps en temps.</p>
+      <div class="safety">⚠️ <strong>Important :</strong> supprimer l'icône de l'écran d'accueil ou vider les données du navigateur peut <strong>effacer définitivement</strong> les informations. Faites une sauvegarde avant, et régulièrement.</div>
+      <p class="muted">${state.derniereSauvegarde ? "Dernière sauvegarde : " + new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(state.derniereSauvegarde + "T12:00:00")) : "Aucune sauvegarde faite pour l'instant."}</p>
       <h3>📲 Passer les données sur l'autre téléphone</h3>
       <ol class="etapes"><li>Sur ce téléphone : « Envoyer » (par Messages, WhatsApp, AirDrop, e-mail…).</li><li>Sur l'autre téléphone : enregistrer le fichier reçu, puis « Importer ».</li></ol>
       <div class="form-actions stack">
@@ -904,23 +922,30 @@
     </div>`;
   }
 
+  function marquerSauvegarde() {
+    state.derniereSauvegarde = today();
+    save();
+    render();
+  }
+
   function exporter() {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "education-enfants-" + today() + ".json";
+    a.download = "titi-loulou-sauvegarde-" + today() + ".json";
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+    marquerSauvegarde();
   }
 
   async function partager() {
-    const nom = "education-enfants-" + today() + ".json";
+    const nom = "titi-loulou-sauvegarde-" + today() + ".json";
     const fichier = new File([JSON.stringify(state)], nom, { type: "application/json" });
     if (navigator.canShare && navigator.canShare({ files: [fichier] })) {
-      try { await navigator.share({ files: [fichier], title: "Sauvegarde Grandir ensemble" }); }
+      try { await navigator.share({ files: [fichier], title: "Sauvegarde Titi & Loulou" }); marquerSauvegarde(); toast("Sauvegarde envoyée ✓"); }
       catch (e) { /* partage annulé */ }
     } else {
       exporter();
@@ -1169,6 +1194,9 @@
   $("#modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
 
   render();
+
+  // Demande au navigateur de ne pas effacer les données automatiquement (pris en compte selon le navigateur).
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     navigator.serviceWorker.register("sw.js").catch(() => {});

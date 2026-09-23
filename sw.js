@@ -1,5 +1,5 @@
 /* Cache hors-ligne : l'application fonctionne sans connexion une fois ouverte. */
-const CACHE = "grandir-v6";
+const CACHE = "grandir-v7";
 const FICHIERS = ["./", "index.html", "css/style.css", "js/activities.js", "js/reperes.js", "js/famille-data.js", "js/app.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "img/lion.svg", "img/loutre.svg"];
 
 self.addEventListener("install", e => {
